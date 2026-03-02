@@ -1,5 +1,5 @@
 ---
-stepsCompleted: [1, 2]
+stepsCompleted: [1, 2, 3, 4, 5, 6]
 inputDocuments: []
 date: 2026-02-27
 author: Teddy
@@ -56,4 +56,80 @@ Une carte interactive permettant de visualiser d'un coup d'œil les zones sans c
 
 ---
 
-<!-- Next: Target Users (step 3) -->
+## Target Users
+
+### Primary Users
+
+**Tom** — Papa de 2 enfants en bas âge. Veut se promener le dimanche en forêt sans prendre de risque. Besoin : identifier rapidement des zones sûres pour une balade en famille.
+
+**Marie** — Photographe animalière. Fait de l'affût en forêt là où il y a des animaux mais pas de chasseurs (risque élevé). Besoin : zones calmes sans chasse pour l'observation.
+
+**Mireille** — Amatrice de champignons. Sort des sentiers pour trouver les meilleurs coins mais a peur des zones de chasse. Besoin : repérer des zones sans chasse pour cueillir en sécurité.
+
+*Besoin commun* : accès rapide à l'information. Flux : arriver sur site/app → carte → (optionnel) géolocalisation → zones visibles → clic pour le type de restriction (parc naturel, RNCFS, réserve locale, terrain privé…). *Moment "aha"* : « Je vois une zone verte près de chez moi, je peux enfin planifier ma sortie sereinement. »
+
+**Positionnement** : NatureTranquille est un outil d'information pour faciliter la cohabitation, pas un outil anti-chasse. Il améliore l'information du public sans restreindre les activités de chasse.
+
+### Secondary Users
+
+Clubs de randonnée, clubs photo, associations nature — relais de diffusion auprès de leurs adhérents.
+
+### User Journey
+
+- **Découverte** : recherche Google, bouche-à-oreille, relais associations
+- **Usage principal** : préparation de sortie
+- **Exigences** : trouvabilité Google, partage facile
+
+---
+
+---
+
+## Success Metrics
+
+### User Success
+
+**Critère principal** : L'utilisateur trouve ce qu'il est venu chercher — une information sur les zones sûres autour de lui. Le succès se mesure à la satisfaction du besoin : découvre une zone qu'il ne connaissait pas, confirme qu'un spot repéré est safe, ou planifie une sortie en sérénité.
+
+**Moments de succès** :
+- "Ah tiens là c'est une réserve, je savais pas — je vais aller me balader là-bas"
+- "L'endroit que j'ai repéré est dans une RNCFS, je peux y aller tranquille"
+- "Où pourrais-je aller tranquille ce week-end ?" → trouve une réponse
+
+### Growth Indicators
+
+**Couverture territoriale** : étendue du territoire couvert (départements, régions). La couverture comme indicateur principal de croissance du projet.
+
+### Secondary (plus tard)
+
+Utilisateurs, performances — à considérer une fois le produit stabilisé.
+
+---
+
+---
+
+## MVP Scope
+
+### Core Features
+
+- Carte affichant les zones sans chasse (zoom, déplacement)
+- Géolocalisation utilisateur
+- Clic sur une zone → détail : type d'interdiction, date de mise à jour, nom
+- Signalement d'erreur : lien email simple (contact@...)
+- App web responsive (consultation mobile)
+
+### Out of Scope for MVP
+
+- App native
+- Mise à jour automatique des données
+- Interdictions temporelles (dates d'ouverture chasse)
+- Crowdsourcing / contributions utilisateurs
+
+### Future Vision
+
+1. Mise à jour automatique des données
+2. Interdictions temporelles par département avec sélecteur de date
+3. Crowdsourcing (incertitude technique — données à définir pour intégration)
+
+---
+
+<!-- Next: Complete (step 6) -->
