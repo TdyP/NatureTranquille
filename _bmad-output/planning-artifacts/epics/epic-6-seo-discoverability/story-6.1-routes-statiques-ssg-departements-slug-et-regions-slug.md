@@ -1,6 +1,5 @@
 ### Story 6.1: Routes statiques SSG `/departements/[slug]` et `/regions/[slug]`
 
-
 **User Story**
 En tant que **Tom recherchant "zones sans chasse Bas-Rhin" sur Google**, je veux trouver une page dédiée au département avec la carte automatiquement centrée sur cette zone, afin d'accéder directement à l'information pertinente.
 
@@ -23,10 +22,10 @@ import {db} from '@/lib/db';
 export async function generateStaticParams() {
     const departements = await db.query(`
     SELECT DISTINCT
-      LOWER(REGEXP_REPLACE(nom_departement, '[^a-zA-Z0-9]', '-', 'g')) AS slug,
-      nom_departement,
-      code_departement
-    FROM zones_sans_chasse
+            LOWER(REGEXP_REPLACE(nom_departement, '[^a-zA-Z0-9]', '-', 'g')) AS slug,
+            nom_departement,
+            code_departement
+        FROM zones
     ORDER BY code_departement
   `);
 
@@ -89,9 +88,9 @@ const bboxQuery = await db.query(
   SELECT
     ST_XMin(ST_Extent(geometry)) as minLng,
     ST_YMin(ST_Extent(geometry)) as minLat,
-    ST_XMax(ST_Extent(geometry)) as maxLng,
-    ST_YMax(ST_Extent(geometry)) as maxLat
-  FROM zones_sans_chasse
+        ST_XMax(ST_Extent(geometry)) as maxLng,
+        ST_YMax(ST_Extent(geometry)) as maxLat
+    FROM zones
   WHERE code_departement = $1
 `,
     [dept.code],
@@ -134,4 +133,3 @@ map.fitBounds(
 - Génération tous départements couverts < 30s build time
 
 ---
-

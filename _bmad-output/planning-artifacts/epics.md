@@ -421,7 +421,7 @@ FR28 → Structure HTML sémantique + ARIA (toutes stories UI)
 
 - `npm run dev` démarre frontend Next.js + backend API
 - PostgreSQL + PostGIS fonctionnel en local
-- Dataset RNCFS Grand Est importé (15-30 zones)
+- Dataset pilote geospatial importe (15-30 zones)
 - Carte affiche zones pilotes Bas-Rhin, Haut-Rhin, Moselle
 - Documentation setup complète dans README.md
 
@@ -660,28 +660,59 @@ N/A (infrastructure setup)
 
 ---
 
-### Story 0.2: Import des données RNCFS + Réserves locales Savoie dans PostGIS
+### Story 0.1b: Migrations backend pour schema PostGIS
 
 **User Story**
-En tant que **développeur**, je veux importer les données géographiques RNCFS + réserves Savoie dans PostgreSQL/PostGIS via un script automatisé, afin de disposer du dataset de zones sans chasse pour le développement.
+En tant que **developpeur backend**, je veux gerer la structure de base de donnees via des migrations versionnees, afin de garantir un schema coherent et reproductible sur tous les environnements.
 
 **Acceptance Criteria**
 
-**GIVEN** : PostgreSQL + PostGIS container est démarré et accessible
-**AND** : Les fichiers de données (Shapefile/GeoJSON/GeoPackage) RNCFS + Savoie sont placés dans `/data/raw/`
-**WHEN** : Le développeur exécute `./scripts/import-data.sh`
+**GIVEN** : Le backend est configure avec un outil de migration SQL (ou ORM)
+**WHEN** : Le developpeur execute les migrations backend
 **THEN** :
 
-- Les données RNCFS sont importées dans la table `zones_sans_chasse` (schéma `public`)
-- Les données Savoie sont importées et fusionnées dans la même table
-- Les colonnes créées : `id`, `nom`, `type_protection`, `gestionnaire`, `source`, `date_maj`, `geometry` (type MULTIPOLYGON, SRID 4326)
-- Un index spatial est créé sur la colonne `geometry` : `CREATE INDEX idx_zones_geom ON zones_sans_chasse USING GIST(geometry)`
-- Un index sur `type_protection` pour filtrage performant
-- Script valide les géométries avec `ST_IsValid()` et corrige avec `ST_MakeValid()` si nécessaire
-- Log final affiche : "✅ X zones RNCFS importées, Y zones Savoie importées, total Z zones"
+- La table `zones` est creee dans le schema `public`
+- Les colonnes structurelles sont creees : `id`, `nom`, `type_protection`, `gestionnaire`, `source`, `date_maj`, `geometry` (type `MULTIPOLYGON`, SRID 4326)
+- Les index necessaires sont crees par migration backend : index spatial GiST sur `geometry` et index sur `type_protection`
+- Les migrations sont idempotentes, versionnees, et executables de facon deterministe en local et CI
+- Aucun script d'import de donnees n'effectue de `CREATE/ALTER/DROP` sur la structure
 
-**AND** : Les données sont normalisées (projection WGS84, géométries valides)
-**AND** : Script gère les erreurs gracieusement (fichier absent, géométrie invalide)
+**AND** : Les migrations sont stockees dans le backend et documentees
+**AND** : Une commande unique permet d'appliquer les migrations sur une base vide
+
+**Accessibility Integration**
+N/A (infrastructure backend)
+
+**Performance & Technical Acceptance**
+
+- Application des migrations < 30s sur base vide
+- Verification schema : `\d+ zones` confirme colonnes + index attendus
+- Le workflow CI echoue si une migration est invalide
+
+---
+
+### Story 0.2: Import generique des donnees geospatiales dans PostGIS
+
+**User Story**
+En tant que **developpeur**, je veux importer les donnees geospatiales demandees dans PostgreSQL/PostGIS via un script automatise, afin d'alimenter le dataset de zones sans modifier la structure de base.
+
+**Acceptance Criteria**
+
+**GIVEN** : PostgreSQL + PostGIS est demarre et accessible
+**AND** : Les migrations backend sont appliquees (Story 0.1b complete)
+**AND** : Les fichiers de donnees (Shapefile/GeoJSON/GeoPackage) a ingerer sont places dans `/data/raw/`
+**WHEN** : Le developpeur execute le script d'import avec les parametres cibles
+**THEN** :
+
+- Le script ingere toutes les donnees explicitement demandees par configuration/arguments
+- Le script n'utilise aucun hardcode de territoire ou de source metier
+- Les donnees sont ecrites dans la table `zones` (schema `public`)
+- Le script n'execute aucune operation DDL (`CREATE TABLE`, `ALTER TABLE`, `DROP`, `CREATE INDEX`)
+- Le script valide les geometries avec `ST_IsValid()` et corrige avec `ST_MakeValid()` si necessaire
+- Le log final affiche le detail des imports executes et le total des zones ecrites
+
+**AND** : Les donnees sont normalisees (projection WGS84, geometries valides)
+**AND** : Script gere les erreurs gracieusement (fichier absent, geometrie invalide)
 
 **Accessibility Integration**
 N/A (data pipeline)
@@ -689,7 +720,7 @@ N/A (data pipeline)
 **Performance & Technical Acceptance**
 
 - Import complet < 60s pour ~50-100 zones (dataset pilote)
-- Requête test `SELECT COUNT(*) FROM zones_sans_chasse WHERE ST_Intersects(geometry, ST_MakeEnvelope(...))` < 50ms
+- Requete test `SELECT COUNT(*) FROM zones WHERE ST_Intersects(geometry, ST_MakeEnvelope(...))` < 50ms
 - Utilisation GDAL/OGR (`ogr2ogr`) pour transformation formats
 
 ---
@@ -701,7 +732,7 @@ En tant que **développeur**, je veux générer et servir dynamiquement des tuil
 
 **Acceptance Criteria**
 
-**GIVEN** : Les données zones sont importées dans PostGIS (Story 0.2 complète)
+**GIVEN** : Les donnees zones sont importees dans PostGIS (Story 0.2 complete)
 **WHEN** : Le backend reçoit une requête tuile MVT `GET /tiles/{z}/{x}/{y}.mvt`
 **THEN** :
 
@@ -1625,7 +1656,7 @@ SELECT
     256,
     true
   ) AS geom
-FROM zones_sans_chasse
+FROM zones
 WHERE ST_Intersects(
   geometry,
   ST_TileEnvelope({z}, {x}, {y})
@@ -2439,10 +2470,10 @@ En tant que **développeur**, je veux stocker tous les signalements utilisateurs
       localisation VARCHAR(200) NOT NULL,
       description TEXT NOT NULL,
       email VARCHAR(255),
-      ip_hash VARCHAR(64) NOT NULL,
-      status VARCHAR(20) DEFAULT 'nouveau' CHECK (status IN ('nouveau', 'en-cours', 'resolu', 'rejete')),
-      notes_internes TEXT,
-      zone_id INT REFERENCES zones_sans_chasse(id), -- si signalement lié à une zone existante
+    ip_hash VARCHAR(64) NOT NULL,
+    status VARCHAR(20) DEFAULT 'nouveau' CHECK (status IN ('nouveau', 'en-cours', 'resolu', 'rejete')),
+    notes_internes TEXT,
+    zone_id INT REFERENCES zones(id), -- si signalement lié à une zone existante
       created_at TIMESTAMPTZ DEFAULT NOW(),
       updated_at TIMESTAMPTZ DEFAULT NOW()
     );
@@ -2548,10 +2579,10 @@ import {db} from '@/lib/db';
 export async function generateStaticParams() {
     const departements = await db.query(`
     SELECT DISTINCT
-      LOWER(REGEXP_REPLACE(nom_departement, '[^a-zA-Z0-9]', '-', 'g')) AS slug,
-      nom_departement,
-      code_departement
-    FROM zones_sans_chasse
+            LOWER(REGEXP_REPLACE(nom_departement, '[^a-zA-Z0-9]', '-', 'g')) AS slug,
+            nom_departement,
+            code_departement
+        FROM zones
     ORDER BY code_departement
   `);
 
@@ -2614,9 +2645,9 @@ const bboxQuery = await db.query(
   SELECT
     ST_XMin(ST_Extent(geometry)) as minLng,
     ST_YMin(ST_Extent(geometry)) as minLat,
-    ST_XMax(ST_Extent(geometry)) as maxLng,
-    ST_YMax(ST_Extent(geometry)) as maxLat
-  FROM zones_sans_chasse
+        ST_XMax(ST_Extent(geometry)) as maxLng,
+        ST_YMax(ST_Extent(geometry)) as maxLat
+    FROM zones
   WHERE code_departement = $1
 `,
     [dept.code],
@@ -2814,10 +2845,10 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     // Pages départements (générées dynamiquement)
     const departements = await db.query(`
     SELECT DISTINCT
-      LOWER(REGEXP_REPLACE(nom_departement, '[^a-zA-Z0-9]', '-', 'g')) AS slug,
-      code_departement,
-      MAX(date_maj) as last_updated
-    FROM zones_sans_chasse
+            LOWER(REGEXP_REPLACE(nom_departement, '[^a-zA-Z0-9]', '-', 'g')) AS slug,
+            code_departement,
+            MAX(date_maj) as last_updated
+        FROM zones
     GROUP BY nom_departement, code_departement
   `);
 
@@ -2951,9 +2982,9 @@ export default async function DepartementPage({params}) {
 
 ## Step 3 Completion Summary
 
-✅ **Epic 0: Project Foundation & Local Development** — 4 stories
+✅ **Epic 0: Project Foundation & Local Development** — 5 stories
 
-- Docker Compose setup, data import RNCFS + Savoie, MVT pipeline, documentation
+- Docker Compose setup, backend migrations, generic data import, MVT pipeline, documentation
 
 ✅ **Epic 1: Core Interactive Map Experience** — 4 stories
 

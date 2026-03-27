@@ -1,6 +1,5 @@
 ### Story 6.3: Sitemap XML généré automatiquement
 
-
 **User Story**
 En tant que **Google Bot**, je veux découvrir automatiquement toutes les pages du site via un sitemap XML, afin d'indexer efficacement le contenu.
 
@@ -44,7 +43,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       LOWER(REGEXP_REPLACE(nom_departement, '[^a-zA-Z0-9]', '-', 'g')) AS slug,
       code_departement,
       MAX(date_maj) as last_updated
-    FROM zones_sans_chasse
+    FROM zones
     GROUP BY nom_departement, code_departement
   `);
 
@@ -87,4 +86,3 @@ Sitemap: https://naturetranquille.fr/sitemap.xml
 - Google Search Console : 0 erreurs sitemap
 
 ---
-

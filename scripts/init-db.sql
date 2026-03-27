@@ -7,5 +7,5 @@ CREATE EXTENSION IF NOT EXISTS postgis;
 -- Verify PostGIS installation
 SELECT PostGIS_version();
 
--- Create zones_sans_chasse table (will be populated by import script)
--- Structure will be created by the import script in Story 0.2
+-- Database structure (tables/indexes) must be managed by backend migrations.
+-- Import scripts should only write data into existing tables.

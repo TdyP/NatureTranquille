@@ -1,6 +1,5 @@
 ### Story 5.4: Stockage signalements PostgreSQL avec référence future
 
-
 **User Story**
 En tant que **développeur**, je veux stocker tous les signalements utilisateurs dans PostgreSQL avec structure permettant traitement futur, afin de construire une roadmap data-driven des corrections à apporter.
 
@@ -19,10 +18,10 @@ En tant que **développeur**, je veux stocker tous les signalements utilisateurs
       localisation VARCHAR(200) NOT NULL,
       description TEXT NOT NULL,
       email VARCHAR(255),
-      ip_hash VARCHAR(64) NOT NULL,
-      status VARCHAR(20) DEFAULT 'nouveau' CHECK (status IN ('nouveau', 'en-cours', 'resolu', 'rejete')),
-      notes_internes TEXT,
-      zone_id INT REFERENCES zones_sans_chasse(id), -- si signalement lié à une zone existante
+    ip_hash VARCHAR(64) NOT NULL,
+    status VARCHAR(20) DEFAULT 'nouveau' CHECK (status IN ('nouveau', 'en-cours', 'resolu', 'rejete')),
+    notes_internes TEXT,
+    zone_id INT REFERENCES zones(id), -- si signalement lié à une zone existante
       created_at TIMESTAMPTZ DEFAULT NOW(),
       updated_at TIMESTAMPTZ DEFAULT NOW()
     );
@@ -101,4 +100,3 @@ export async function POST(request: Request) {
 ---
 
 ---
-

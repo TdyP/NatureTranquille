@@ -6,7 +6,7 @@ En tant que **développeur**, je veux générer et servir dynamiquement des tuil
 
 **Acceptance Criteria**
 
-**GIVEN** : Les données zones sont importées dans PostGIS (Story 0.2 complète)
+**GIVEN** : Les donnees zones sont importees dans PostGIS (Story 0.2 complete)
 **WHEN** : Le backend reçoit une requête tuile MVT `GET /tiles/{z}/{x}/{y}.mvt`
 **THEN** :
 

@@ -47,7 +47,7 @@ flowchart LR
     Raw[Données Sources<br/>Shapefile/GeoJSON]
     Import[Script Import<br/>ogr2ogr]
     Validate[Validation PostGIS<br/>ST_IsValid]
-    Store[(Table zones_sans_chasse<br/>MULTIPOLYGON)]
+    Store[(Table zones<br/>MULTIPOLYGON)]
     MVT[Génération MVT<br/>ST_AsMVT]
     Client[MapLibre Client]
 
@@ -106,7 +106,7 @@ flowchart LR
 **Schéma principal** :
 
 ```sql
-CREATE TABLE zones_sans_chasse (
+CREATE TABLE zones (
     id SERIAL PRIMARY KEY,
     nom VARCHAR(255) NOT NULL,
     type_protection VARCHAR(100),
@@ -116,8 +116,8 @@ CREATE TABLE zones_sans_chasse (
     geometry GEOMETRY(MULTIPOLYGON, 4326) NOT NULL
 );
 
-CREATE INDEX idx_zones_geom ON zones_sans_chasse USING GIST(geometry);
-CREATE INDEX idx_zones_type ON zones_sans_chasse(type_protection);
+CREATE INDEX idx_zones_geom ON zones USING GIST(geometry);
+CREATE INDEX idx_zones_type ON zones(type_protection);
 ```
 
 **Responsabilités** :

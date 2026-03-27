@@ -28,7 +28,7 @@ SELECT
     256,
     true
   ) AS geom
-FROM zones_sans_chasse
+FROM zones
 WHERE ST_Intersects(
   geometry,
   ST_TileEnvelope({z}, {x}, {y})
