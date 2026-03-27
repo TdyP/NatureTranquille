@@ -1,5 +1,5 @@
 ---
-stepsCompleted: [1, 2, 3, 4, 5]
+stepsCompleted: [1, 2, 3, 4, 5, 6, 7, 8]
     - '_bmad-output/planning-artifacts/product-brief-NatureTranquille-2026-02-27.md'
     - '_bmad-output/planning-artifacts/prd.md'
     - '_bmad-output/planning-artifacts/ux-design-specification.md'
@@ -8,6 +8,9 @@ workflowType: 'architecture'
 project_name: 'NatureTranquille'
 user_name: 'Teddy'
 date: '2026-03-22'
+status: 'complete'
+completedAt: '2026-03-27'
+lastStep: 8
 ---
 
 # Architecture NatureTranquille
@@ -420,7 +423,7 @@ Ces préoccupations affecteront **multiples composants** et **toutes les phases*
 4. **Scalabilité Future :**
     - Incremental Static Regeneration (ISR) disponible Phase 2
     - Edge Runtime compatible
-    - Turbopack build tooling (Next.js 14+)
+    - Turbopack build tooling (Next.js 16)
 
 ### Commande d'Initialisation
 
@@ -576,7 +579,7 @@ NEXT_PUBLIC_API_BASE_URL="http://localhost:3000/api"
 │              VPS Unique (~€5/mois Hetzner/OVH)         │
 │                                                          │
 │  ┌──────────────────────────────────────────────────┐  │
-│  │  Next.js 14+ App Router (TypeScript)             │  │
+│  │  Next.js 16 App Router (TypeScript)              │  │
 │  │                                                   │  │
 │  │  ┌────────────────┐     ┌──────────────────┐    │  │
 │  │  │ Pages (SSG)    │     │ API Routes       │    │  │
@@ -613,8 +616,6 @@ NEXT_PUBLIC_API_BASE_URL="http://localhost:3000/api"
 │                                                          │
 │  Nginx (reverse proxy :80/:443, Let's Encrypt HTTPS)    │
 └─────────────────────────────────────────────────────────┘
-                           ↓
-                  Cloudflare CDN (cache tiles gratuit)
 ```
 
 ---
@@ -836,15 +837,15 @@ module.exports = {
 - Cache filesystem basique intégré (tiles pré-générées)
 - Configuration `TILESERV_CACHE_MAX_AGE=86400` (1 jour)
 
-**CDN Cloudflare (Gratuit) :**
+**Cache Nginx (proxy_cache tiles) :**
 
-- Cache tiles MVT automatique (content-type `application/vnd.mapbox-vector-tile`)
-- Purge sélective lors mise à jour département
+- `proxy_cache_valid 200 7d;` pour les tiles MVT (fort cache, données stables)
+- Purge via `proxy_cache_purge` lors mise à jour département
 
 **Évolution Phase 2 :**
 
 - Redis pour cache API responses complexes (si query times > 200ms)
-- Cache pre-warming tiles niveaux zoom critiques (6-14)
+- CDN européen (Hetzner Object Storage ou BunnyCDN) si trafic tiles croît
 
 ---
 
@@ -1317,7 +1318,7 @@ MapLibre nécessite client-side rendering (`'use client'`). Next.js gère automa
 - PostgreSQL + PostGIS + pg_tileserv + Next.js sur même serveur
 - Connexion localhost ultra-rapide (pas latency réseau)
 - Coût minimal MVP (2-3 départements, trafic faible)
-- Scalabilité future : séparer DB → instance dédiée, CDN Cloudflare gratuit
+- Scalabilité future : séparer DB → instance dédiée si trafic croît
 
 **Providers Recommandés :**
 
@@ -1381,9 +1382,9 @@ jobs:
         steps:
             - uses: actions/checkout@v3
 
-            - uses: actions/setup-node@v3
+            - uses: actions/setup-node@v4
               with:
-                  node-version: '20'
+                  node-version: '24'
                   cache: 'npm'
 
             - name: Install dependencies
@@ -1495,7 +1496,7 @@ export default function RootLayout({ children }) {
 
 | Layer             | Technology           | Version              | Justification                            |
 | ----------------- | -------------------- | -------------------- | ---------------------------------------- |
-| **Frontend**      | Next.js              | Latest stable (15.x) | SSG natif, API Routes, TypeScript strict |
+| **Frontend**      | Next.js              | 16 (latest stable)   | SSG natif, API Routes, TypeScript strict |
 |                   | React                | Latest (19.x)        | Server Components, hooks                 |
 |                   | TypeScript           | Latest (5.x)         | Type safety end-to-end                   |
 |                   | Tailwind CSS         | Latest (4.x)         | Utility-first, RGAA compliance           |
@@ -2033,6 +2034,487 @@ describe('ZoneSearchParamsSchema', () => {
 
 ---
 
+## Structure Projet & Frontières Architecturales (Step 6)
+
+### Mapping Features → Composants Architecturaux
+
+| Feature MVP | Composants | API Routes | Hooks | Context |
+|-------------|-----------|------------|-------|---------|
+| Carte Interactive | `MapComponent`, `MapContainer` | — | — | `MapContext` |
+| Recherche Géographique | `SearchBar`, `SearchResults` | `/api/search` | `useSearch` | — |
+| Géolocalisation Mobile | `GeolocationButton` | — | `useGeolocation` | — |
+| Détails Zones | `ZonePopup`, `ZoneDetails`, `ZoneSidebar`, `ZoneBottomSheet` | `/api/zones/[id]` | `useZone` | `MapContext (selectedZoneId)` |
+| Contexte Intelligent | — | — | `useViewportContext` | `MapContext (mapBounds, lastViewedRegion)` |
+| Feedback Signalement | `FeedbackButton`, `FeedbackForm`, `FeedbackToast` | `/api/feedback` | — | — |
+| Assistance Viewport Vide | `EmptyViewportHint` | — | `useViewportMonitor` | `MapContext (mapBounds)` |
+
+---
+
+### Arborescence Complète du Projet
+
+```
+naturetranquille/
+│
+├── README.md
+├── package.json
+├── package-lock.json
+├── next.config.js                         # Headers cache, CSP
+├── tailwind.config.ts                     # Palette NatureTranquille validée RGAA
+├── tsconfig.json                          # strict: true, paths @/*
+├── vitest.config.ts
+├── drizzle.config.ts                      # Drizzle Kit config
+├── .eslintrc.json                         # Rules no-console, react-hooks
+├── .prettierrc                            # Tailwind plugin sort
+├── .gitignore
+├── .env.local                             # (gitignored) DATABASE_URL, TILE_SERVER_URL
+├── .env.example                           # Template variables (committé)
+│
+├── .github/
+│   └── workflows/
+│       └── deploy.yml                     # CI/CD : test → build → SSH deploy → PM2 reload
+│
+├── drizzle/                               # Drizzle ORM (RACINE, pas dans /src)
+│   ├── schema.ts                          # Source of truth : tables + types inférés
+│   └── migrations/
+│       ├── 0001_init.sql                  # CREATE TABLE zones_protection + PostGIS indexes
+│       └── meta/
+│           └── _journal.json
+│
+├── public/
+│   ├── fonts/
+│   │   └── inter/                         # Inter variable font (self-hosted, RGPD)
+│   ├── images/
+│   │   ├── og-default.png                 # OpenGraph par défaut
+│   │   └── logo.svg
+│   └── robots.txt
+│
+├── src/
+│   ├── app/
+│   │   ├── globals.css                    # Tailwind directives, variables CSS
+│   │   ├── layout.tsx                     # Root layout (MapProvider, fonts, meta)
+│   │   ├── page.tsx                       # Homepage (carte interactive)
+│   │   ├── error.tsx                      # Error boundary global ('use client')
+│   │   ├── loading.tsx                    # Loading global (skeleton)
+│   │   ├── not-found.tsx
+│   │   ├── sitemap.ts                     # Sitemap XML dynamique
+│   │   ├── robots.ts
+│   │   │
+│   │   ├── a-propos/
+│   │   │   └── page.tsx                   # Page statique (SSG)
+│   │   │
+│   │   ├── sources/
+│   │   │   └── page.tsx                   # Sources données + roadmap (SSG)
+│   │   │
+│   │   ├── departements/
+│   │   │   ├── page.tsx                   # Listing départements couverts (SSG)
+│   │   │   └── [slug]/
+│   │   │       ├── page.tsx               # Page département (SSG, generateStaticParams)
+│   │   │       ├── error.tsx
+│   │   │       └── not-found.tsx
+│   │   │
+│   │   └── api/
+│   │       ├── search/
+│   │       │   └── route.ts               # GET /api/search?q= → BAN API proxy
+│   │       ├── zones/
+│   │       │   ├── route.ts               # GET /api/zones?bounds= → PostGIS
+│   │       │   └── [id]/
+│   │       │       └── route.ts           # GET /api/zones/:id → détails zone
+│   │       ├── feedback/
+│   │       │   └── route.ts               # POST /api/feedback → INSERT
+│   │       └── departements/
+│   │           └── [slug]/
+│   │               └── route.ts           # GET /api/departements/:slug → meta SSG
+│   │
+│   ├── components/
+│   │   │
+│   │   ├── ui/                            # shadcn/ui (auto-généré, NE PAS MODIFIER)
+│   │   │   ├── button.tsx
+│   │   │   ├── dialog.tsx
+│   │   │   ├── input.tsx
+│   │   │   ├── toast.tsx
+│   │   │   ├── toaster.tsx
+│   │   │   └── sheet.tsx
+│   │   │
+│   │   ├── map/
+│   │   │   ├── MapContainer.tsx           # Layout wrapper plein écran
+│   │   │   ├── MapComponent.tsx           # MapLibre GL JS ('use client', useEffect)
+│   │   │   ├── MapControls.tsx            # Zoom +/-, Vue France (RGAA keyboard)
+│   │   │   ├── SearchBar.tsx              # Input debounce + dropdown BAN
+│   │   │   ├── SearchResults.tsx          # Suggestions autocomplete (aria-live)
+│   │   │   ├── GeolocationButton.tsx      # Bouton géoloc (44px, fallback silencieux)
+│   │   │   ├── ZonePopup.tsx              # Popup clic zone (desktop)
+│   │   │   ├── ZoneDetails.tsx            # Contenu : nom, statut, gestionnaire, MAJ
+│   │   │   ├── ZoneSidebar.tsx            # Sidebar 400px slide-in (desktop ≥ 1024px)
+│   │   │   ├── ZoneBottomSheet.tsx        # Bottom sheet 40-80vh swipe (mobile < 768px)
+│   │   │   ├── EmptyViewportHint.tsx      # Toast viewport vide (timeout 2s)
+│   │   │   └── MapAccessibleList.tsx      # Liste sr-only (alternative textuelle RGAA)
+│   │   │
+│   │   ├── feedback/
+│   │   │   ├── FeedbackButton.tsx         # CTA flottant
+│   │   │   ├── FeedbackForm.tsx           # email opt + message opt + département
+│   │   │   └── FeedbackToast.tsx          # Confirmation envoi
+│   │   │
+│   │   └── layout/
+│   │       ├── Header.tsx
+│   │       ├── Footer.tsx                 # Mentions légales + attribution sources
+│   │       └── PageWrapper.tsx            # Layout pages statiques
+│   │
+│   ├── contexts/
+│   │   └── MapContext.tsx                 # useReducer + Context (State + Dispatch séparés)
+│   │                                      # selectedZoneId, mapBounds, searchQuery, lastViewedRegion
+│   │
+│   ├── hooks/
+│   │   ├── useZones.ts                    # SWR /api/zones?bounds= (reload on bounds change)
+│   │   ├── useZone.ts                     # SWR /api/zones/:id
+│   │   ├── useSearch.ts                   # SWR + debounce 300ms /api/search?q=
+│   │   ├── useGeolocation.ts              # Geolocation API + fallback silencieux
+│   │   ├── useViewportMonitor.ts          # Détection zones visibles (timeout 2s)
+│   │   └── useBreakpoint.ts              # Mobile/tablet/desktop breakpoints
+│   │
+│   ├── lib/
+│   │   ├── db/
+│   │   │   ├── index.ts                   # Drizzle client (node-postgres pool, singleton)
+│   │   │   └── queries.ts                 # getZonesInBounds, getZoneById, getDepartement
+│   │   ├── validations/
+│   │   │   └── schemas.ts                 # Zod : ZoneSearchParamsSchema, FeedbackSchema
+│   │   ├── geo/
+│   │   │   └── utils.ts                   # parseBounds, formatArea, boundsToPostGIS
+│   │   └── utils.ts                       # cn() Tailwind merge, formatDate, debounce
+│   │
+│   ├── types/
+│   │   ├── geo.ts                         # GeoJSON types, ZoneProtection, Departement
+│   │   └── api.ts                         # Types responses/requests API
+│   │
+│   ├── constants/
+│   │   └── index.ts                       # MAX_ZOOM=18, DEFAULT_CENTER, DEBOUNCE_DELAY=300
+│   │                                      # BOUNDS_FRANCE, EMPTY_VIEWPORT_TIMEOUT=2000
+│   │
+│   └── middleware.ts                      # Rate limiting /api/*, CORS headers
+│
+└── tests/
+    ├── unit/
+    │   ├── lib/
+    │   │   ├── db/
+    │   │   │   └── queries.test.ts
+    │   │   ├── validations/
+    │   │   │   └── schemas.test.ts
+    │   │   └── geo/
+    │   │       └── utils.test.ts
+    │   └── hooks/
+    │       ├── useSearch.test.ts
+    │       └── useGeolocation.test.ts
+    ├── integration/
+    │   └── api/
+    │       ├── zones.test.ts
+    │       ├── search.test.ts
+    │       └── feedback.test.ts
+    └── setup.ts                           # Vitest global setup + Testing Library matchers
+```
+
+---
+
+### Frontières Architecturales
+
+#### Server / Client
+
+```
+Server (RSC, SSG, API Routes)            │  Client ('use client')
+──────────────────────────────────────── │ ──────────────────────────────────────
+app/layout.tsx                           │  MapComponent.tsx (MapLibre WebGL)
+app/departements/[slug]/page.tsx (SSG)   │  MapContext.tsx (useReducer)
+app/api/*/route.ts                       │  SearchBar.tsx, FeedbackForm.tsx
+lib/db/* (Drizzle ORM, node-postgres)    │  ZoneBottomSheet.tsx (swipe)
+drizzle/schema.ts                        │  useZones.ts, useGeolocation.ts (SWR + browser API)
+```
+
+**Règle :** `MapProvider` (`'use client'`) dans `app/layout.tsx` (Server Component) — pattern Next.js valide.
+
+#### Base de Données
+
+```
+Accès autorisé (via lib/db/queries.ts)   │  Interdit
+──────────────────────────────────────── │ ──────────────────────────────────────
+app/api/*/route.ts                       │  Import drizzle-orm dans composants/hooks
+app/departements/[slug]/page.tsx (SSG)   │  Connexion DB côté client (JAMAIS)
+lib/db/queries.ts                        │
+```
+
+#### pg_tileserv / Tiles
+
+```
+Client MapLibre (fetch direct :7800)     │  Proxy Next.js (non utilisé)
+──────────────────────────────────────── │ ──────────────────────────────────────
+NEXT_PUBLIC_TILE_SERVER_URL env var      │  Tiles servies directement par Nginx
+Cache Nginx proxy_cache (7 jours)        │  (performance optimale, sans CDN MVP)
+```
+
+#### API Publique / Interne
+
+```
+Public (rate-limited middleware.ts)      │  Interne SSG uniquement
+──────────────────────────────────────── │ ──────────────────────────────────────
+GET  /api/search?q=                      │  /api/departements/:slug
+GET  /api/zones?bounds=                  │  (appelé par generateStaticParams SSG)
+GET  /api/zones/:id                      │
+POST /api/feedback                       │
+```
+
+---
+
+### Flux de Données Principal
+
+```
+1. Ouverture site
+   └─ app/layout.tsx (Server) → MapProvider (Client) → children
+
+2. Initialisation carte
+   └─ MapComponent → MapLibre init → addSource tiles pg_tileserv (:7800)
+
+3. Chargement zones
+   └─ useZones (SWR) → GET /api/zones?bounds= → lib/db/queries → PostGIS ST_Intersects
+
+4. Clic zone
+   └─ dispatch SELECT_ZONE → MapContext → ZoneSidebar (desktop) / ZoneBottomSheet (mobile)
+   └─ useZone (SWR) → GET /api/zones/:id → PostGIS by ID
+
+5. Recherche adresse
+   └─ SearchBar → debounce 300ms → useSearch → GET /api/search → BAN API
+   └─ Sélection → map.flyTo() + dispatch UPDATE_BOUNDS
+
+6. Géolocalisation
+   └─ useGeolocation → navigator.geolocation → map.flyTo()
+   └─ Refus → fallback silencieux (vue France)
+
+7. Signalement
+   └─ FeedbackForm → POST /api/feedback → Zod validation → INSERT feedbacks → FeedbackToast
+```
+
+---
+
+**Step 6 Complete.** Structure complète définie — arborescence projet, frontières architecturales, mapping features → fichiers, et flux de données documentés.
+
+---
+
+## Validation Architecture & Complétude (Step 7)
+
+### 1. Validation de Cohérence
+
+#### Compatibilité des Décisions Technologiques
+
+| Paire | Compatibilité | Note |
+|-------|--------------|------|
+| Next.js 16 + React 19 | ✅ | Versions alignées (RSC, Server Actions) |
+| Next.js 16 + Drizzle ORM | ✅ | Léger, edge-compatible, pas de conflit App Router |
+| MapLibre + `'use client'` | ✅ | Isolé correctement, SSR non requis |
+| useReducer + Context + SWR | ✅ | Complémentaires : Context = state UI, SWR = server data |
+| Tailwind 4.x + shadcn/ui | ✅ | shadcn/ui compatible Tailwind 4 |
+| Drizzle + node-postgres + PostGIS | ✅ | `sql` template tag pour ST_*, custom geometry type |
+| Zod + API Routes Next.js | ✅ | Pattern natif, ZodError capté dans try/catch |
+| pg_tileserv + PostgreSQL/PostGIS | ✅ | Connexion directe, zero-config |
+| Nginx proxy_cache + pg_tileserv | ✅ | Cache côté Nginx, pas de dépendance CDN externe |
+| Vitest + Testing Library + Next.js 16 | ✅ | Stack test standard App Router |
+| Node.js 24 LTS + Next.js 16 | ✅ | Runtime LTS aligné avec version framework |
+
+**Aucune incompatibilité détectée.**
+
+#### Cohérence des Patterns
+
+| Pattern | Alignement Stack | Statut |
+|---------|-----------------|--------|
+| snake_case DB ↔ camelCase TS via Drizzle | Mapping automatique Drizzle | ✅ |
+| `lib/db/queries.ts` seul point accès DB | Frontière architecturale respectée | ✅ |
+| `'use client'` MapComponent + useReducer Context | Server/Client boundary correcte | ✅ |
+| SWR data fetching côté client uniquement | Pas de conflit avec Server Components | ✅ |
+| `drizzle/` hors `/src` | Convention Drizzle Kit respectée | ✅ |
+| Tests dans `/tests/` (miroir) | Cohérent avec vitest.config.ts | ✅ |
+| Nginx proxy_cache tiles (pas de CDN externe) | Coût minimal, self-hosted | ✅ |
+
+---
+
+### 2. Couverture des Exigences
+
+#### Fonctionnelles MVP (7 features)
+
+| Feature | Composants | API | Couverture |
+|---------|-----------|-----|-----------|
+| Carte Interactive | MapComponent + MapContext + pg_tileserv | — | ✅ |
+| Recherche Géographique (BAN debounce 300ms) | SearchBar + useSearch | /api/search | ✅ |
+| Géolocalisation Mobile (fallback silencieux) | GeolocationButton + useGeolocation | — | ✅ |
+| Détails Zones (popup/sidebar/bottom sheet) | ZoneDetails + ZoneSidebar + ZoneBottomSheet | /api/zones/:id | ✅ |
+| Contexte Intelligent (géoloc > last > France) | MapContext lastViewedRegion + useViewportContext | — | ✅ |
+| Feedback Signalement | FeedbackForm + FeedbackToast | /api/feedback | ✅ |
+| Assistance Viewport Vide (toast 2s) | EmptyViewportHint + useViewportMonitor | — | ✅ |
+
+**Couverture 7/7 features MVP ✅**
+
+#### Non-Fonctionnelles
+
+| Exigence NFR | Solution Architecturale | Statut |
+|-------------|------------------------|--------|
+| Performance < 2s chargement | MVT tiles pg_tileserv + Nginx proxy_cache | ✅ |
+| Détails zone < 500ms | Métadonnées embarquées tiles + SWR cache | ✅ |
+| Bundle JS < 200KB | Next.js code splitting + MapLibre isolé | ✅ |
+| RGAA 4.1 AA | shadcn/ui + MapAccessibleList + Pattern 8 | ✅ |
+| RGPD | Pas de cookies tiers, polices self-hosted, VPS UE | ✅ |
+| SEO SSG | generateStaticParams `/departements/[slug]` + sitemap.ts | ✅ |
+| Scalabilité 100+ depts | Architecture stateless, pg_tileserv horizontal scaling | ✅ |
+| Rate limiting | middleware.ts 100 req/15min par IP | ✅ |
+| SQL injection | Drizzle parameterized queries + Zod validation | ✅ |
+| Coût minimal | VPS unique ~€3.50-5/mois, pas de CDN externe MVP | ✅ |
+
+---
+
+### 3. Readiness Implémentation
+
+#### Complétude Décisions
+
+| Catégorie | État |
+|-----------|------|
+| Stack technologique avec versions | ✅ Complet |
+| Commande initialisation `create-next-app` | ✅ Documentée |
+| Variables d'environnement | ✅ Toutes listées avec `.env.example` |
+| Schéma DB Drizzle (exemple complet + PostGIS) | ✅ Complet |
+| Queries PostGIS (exemples ST_Intersects) | ✅ Complet |
+| Déploiement VPS + Nginx + PM2 | ✅ Commandes documentées |
+| CI/CD GitHub Actions Node.js 24 | ✅ YAML complet |
+
+#### Complétude Patterns (12 conflits couverts)
+
+| Pattern | Conflits Résolus |
+|---------|-----------------|
+| Naming DB/Code/API | ✅ 3 conflits |
+| Structure fichiers | ✅ 4 conflits (tests co-localisés, stores vs contexts, drizzle racine) |
+| Format réponses API | ✅ 2 conflits (wrapper vs direct, dates ISO 8601) |
+| State management | ✅ Action types SCREAMING_SNAKE_CASE, immutabilité, local vs global |
+| Error handling | ✅ Hiérarchie boundaries, codes HTTP, logging prefix |
+| Loading states | ✅ Boolean vs enum, skeleton vs spinner |
+| Tests | ✅ Structure miroir, nommage, priorités |
+| Accessibilité | ✅ ARIA, touch targets 44px, palette contrastes WCAG AA |
+
+---
+
+### 4. Analyse des Gaps
+
+#### Gaps Critiques
+
+Aucun. ✅
+
+#### Gaps Importants (détails d'implémentation, traités dans stories dev)
+
+| Gap | Fichier Concerné |
+|-----|-----------------|
+| `feedbacks` table schema complet | `drizzle/schema.ts` |
+| `departements` table schema | `drizzle/schema.ts` |
+| pg_tileserv systemd service config | Config serveur VPS |
+
+#### Gaps Mineurs
+
+| Gap | Note |
+|-----|------|
+| Progressive enhancement sans JS | Liste zones fallback si MapLibre KO |
+| Script warm-up tiles | pg_tileserv génère on-demand ; optionnel |
+| CDN européen Phase 2 | Hetzner Object Storage ou BunnyCDN si trafic tiles croît |
+
+---
+
+### 5. Checklist Complétude Architecture
+
+**✅ Analyse de Contexte (Step 2)**
+- [x] Contexte projet analysé (6 concerns transverses mappés)
+- [x] Complexité évaluée (Moyenne avec spécialisation géospatiale)
+- [x] Exigences fonctionnelles et NFR documentées complètement
+
+**✅ Starter Template (Step 3)**
+- [x] `create-next-app` évalué vs T3 Stack vs Vite — décision justifiée
+- [x] Commande init complète documentée
+- [x] Post-init installations listées
+
+**✅ Décisions Architecturales Core (Step 4)**
+- [x] Pattern architecture (Next.js 16 Fullstack + pg_tileserv séparé)
+- [x] Stack complet : Next.js 16, React 19, TypeScript 5, Tailwind 4, MapLibre 4, Drizzle, PostGIS
+- [x] Node.js 24 LTS, pas de Cloudflare CDN MVP
+- [x] 5 catégories décisions avec exemples de code
+
+**✅ Patterns d'Implémentation (Step 5)**
+- [x] 12 conflits identifiés et résolus
+- [x] Anti-patterns documentés avec alternatives
+- [x] ESLint + Prettier config
+
+**✅ Structure Projet (Step 6)**
+- [x] Arborescence complète (tous fichiers et répertoires nommés)
+- [x] Frontières Server/Client, DB, Tiles, API
+- [x] Mapping 7 features MVP → fichiers spécifiques
+- [x] Flux de données principal tracé
+
+---
+
+### Bilan de Validation
+
+**Statut Global : ✅ PRÊT POUR L'IMPLÉMENTATION**
+
+**Niveau de Confiance : ÉLEVÉ**
+
+**Points Forts :**
+- Stack moderne cohérente, zéro over-engineering MVP
+- Géospatial correctement architecturé (PostGIS + MVT + pg_tileserv)
+- RGAA 4.1 AA et RGPD intégrés dès le départ
+- Coût minimal : VPS unique ~€3.50-5/mois, pas de service externe payant MVP
+- Patterns univoques pour agents IA (12 conflits résolus)
+
+**Axes d'Amélioration Phase 2 :**
+- Redis cache applicatif (si query times > 200ms à l'échelle)
+- CDN européen tiles (si trafic croît significativement)
+- Sentry error tracking (monitoring production)
+- NextAuth.js v5 (si contributions utilisateurs)
+- Read replicas PostGIS (si trafic élevé > 50 départements)
+
+---
+
+**Step 7 Complete.** Architecture validée — cohérence, couverture exigences, et readiness implémentation confirmées.
+
+---
+
+## Handoff Implémentation (Step 8)
+
+### Guide pour Agents IA — Règles d'Or
+
+1. **Ce document est la source de vérité unique** pour toutes les décisions techniques NatureTranquille
+2. **Respecter les frontières architecturales** : jamais d'import `drizzle-orm` dans les composants, jamais de connexion DB côté client
+3. **Suivre les patterns Step 5** : naming, state management, error handling, accessibilité — sans exception
+4. **Respecter l'arborescence Step 6** : créer les fichiers aux emplacements définis, pas d'improvisation
+5. **useReducer + Context** (pas Zustand), **SWR** (pas React Query), **Drizzle** (pas Prisma) — décisions finales
+
+### Première Action d'Implémentation
+
+```bash
+npx create-next-app@latest naturetranquille \
+  --typescript \
+  --tailwind \
+  --app \
+  --eslint \
+  --src-dir \
+  --import-alias "@/*"
+```
+
+Puis suivre les installations post-init documentées en Section "Starter Template".
+
+### Prochaines Étapes Recommandées
+
+| Étape | Workflow BMAD | Description |
+|-------|--------------|-------------|
+| **1. Épics & Stories** | `create-epics-and-stories` | Découper les 7 features MVP en stories implémentables |
+| **2. Sprint Planning** | `sprint-planning` | Prioriser les stories pour Sprint 1 |
+| **3. Dev Story** | `dev-story` | Implémenter story par story avec l'agent Amelia |
+
+---
+
+**Workflow `create-architecture` — COMPLET ✅**
+
+Document : [_bmad-output/planning-artifacts/architecture.md](_bmad-output/planning-artifacts/architecture.md)
+Statut : Prêt pour implémentation | 8/8 étapes complétées | 27 mars 2026
+
+---
+
 **La portée architecturale est maintenant clairement définie. Nous pouvons procéder aux décisions architecturales détaillées.**
 
 ---
@@ -2116,8 +2598,8 @@ npx create-next-app@latest naturetranquille \
 **Langage & Runtime :**
 
 - **TypeScript 5.x** : Strict mode activé (`strict: true` tsconfig)
-- **Node.js 18+** : Runtime requis Next.js 14+
-- **React 18+** : Server Components & Client Components supportés
+- **Node.js 24** (LTS) : Runtime requis Next.js 16
+- **React 19+** : Server Components & Client Components supportés
 
 **Styling Solution :**
 
@@ -2128,7 +2610,7 @@ npx create-next-app@latest naturetranquille \
 
 **Build Tooling :**
 
-- **Turbopack** : Build tooling Next.js 14+ (remplace Webpack progressivement)
+- **Turbopack** : Build tooling Next.js 16 (remplace Webpack progressivement)
 - **Bundle Optimization** : Code splitting automatique par route
 - **Image Optimization** : `next/image` component optimisé
 - **Font Optimization** : `next/font` Google Fonts optimisation automatique
@@ -2178,7 +2660,7 @@ naturetranquille/
 - **Server Components** : Fetch data directement dans composants (async/await)
 - **Client Components** : `'use client'` directive pour interactivité
 - **Streaming** : `<Suspense>` boundaries pour loading progressif
-- **Caching** : Fetch requests cachées par défaut Next.js 14+
+- **Caching** : Fetch requests cachées par défaut Next.js 16
 
 **Environment Variables :**
 
