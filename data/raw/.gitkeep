@@ -1,0 +1,4 @@
+# Place raw data files (Shapefile, GeoJSON, GeoPackage) here
+# Example:
+# - rncfs.shp
+# - reserves-savoie.geojson
