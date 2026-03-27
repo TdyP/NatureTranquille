@@ -7,6 +7,11 @@
 - Tous les commentaires et autre doc doivent être en anglais
 - Les noms de variables, fonctions, classes, etc. doivent être en anglais et explicites, évite les abréviations.
 
+## Dépendances
+
+- Pour ajouter des dépendances, lance l'install et laisse npm mettre à jour le package.json et package-lock.json.
+- Ne modifie jamais manuellement le package-lock.json.
+
 ## Conventions de code
 
 - Code clair > commentaires. Les commentaires doivent être exceptionnels, pour des algos compliqués et impossible à simplifier.
