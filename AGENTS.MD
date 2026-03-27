@@ -15,3 +15,7 @@
 
 - Utilise des types explicites pour les fonctions, objets, etc. évite les `any`
 - Laisse typescript inférer les types le plus possible. Ajoute des annotations quand c'est strictement nécessaire.
+
+## Lancement de l'app
+
+- N'essaye de pas de lancer l'app. Je m'en occupe.
