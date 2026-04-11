@@ -17,7 +17,9 @@ services:
       retries: 5
 
   backend:
-    image: node:24-alpine
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
     working_dir: /app
     environment:
       NODE_ENV: development
@@ -32,7 +34,6 @@ services:
     depends_on:
       db:
         condition: service_healthy
-    command: sh -c "npm install && npm run dev"
 
   frontend:
     image: node:24-alpine
@@ -51,5 +52,19 @@ services:
       - backend
     command: sh -c "npm install && npm run dev"
 
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    environment:
+      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_EMAIL:-admin@local.dev}
+      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_PASSWORD:-admin}
+    ports:
+      - "5050:80"
+    volumes:
+      - pgadmin_data:/var/lib/pgadmin
+    depends_on:
+      db:
+        condition: service_healthy
+
 volumes:
   postgres_data:
+  pgadmin_data:

@@ -11,7 +11,8 @@
         "test": "node --test --import tsx \"src/**/*.test.ts\"",
         "db:generate": "drizzle-kit generate",
         "db:migrate": "tsx src/db/migrate.ts",
-        "db:check": "drizzle-kit check"
+        "db:check": "drizzle-kit check",
+        "db:import": "tsx src/import-zones.ts"
     },
     "dependencies": {
         "express": "4.19.2",
