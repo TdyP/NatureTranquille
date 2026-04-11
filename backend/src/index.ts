@@ -2,6 +2,7 @@ import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import {pool} from './db/client';
+import tilesRouter from './routes/tiles';
 
 dotenv.config();
 
@@ -29,10 +30,13 @@ app.get('/', (req, res) => {
         version: '0.1.0',
         endpoints: {
             health: '/health',
-            tiles: '/tiles/{z}/{x}/{y}.mvt (coming soon)',
+            tiles: '/tiles/{z}/{x}/{y}.mvt',
         },
     });
 });
+
+// Mount routers
+app.use('/', tilesRouter);
 
 // Start server
 app.listen(port, () => {
