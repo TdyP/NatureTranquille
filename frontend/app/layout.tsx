@@ -1,5 +1,6 @@
 import type {Metadata} from 'next';
 import './globals.css';
+import Header from '@/components/Header';
 
 export const metadata: Metadata = {
     title: 'NatureTranquille - Carte des zones sans chasse en France',
@@ -10,7 +11,14 @@ export const metadata: Metadata = {
 export default function RootLayout({children}: {children: React.ReactNode}) {
     return (
         <html lang="fr">
-            <body className="font-sans antialiased">{children}</body>
+            <body className="h-screen overflow-hidden font-sans antialiased">
+                <div className="flex h-full flex-col">
+                    <Header />
+                    <main id="main-content" className="flex-1 overflow-hidden">
+                        {children}
+                    </main>
+                </div>
+            </body>
         </html>
     );
 }
