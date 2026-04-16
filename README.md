@@ -107,30 +107,77 @@ Les volumes Docker sont configurés pour le hot reload automatique :
 
 ### Variables d'environnement
 
-Voir `.env.example` pour la liste complète. Principales variables :
+Le fichier `.env.example` documente toutes les variables d'environnement nécessaires. Copier ce fichier vers `.env` et ajuster les valeurs si nécessaire.
+
+**Variables principales :**
 
 ```env
 # Database
-POSTGRES_DB=naturetranquille
-POSTGRES_USER=postgres
-POSTGRES_PASSWORD=changeme
+POSTGRES_DB=naturetranquille            # Nom de la base de données
+POSTGRES_USER=postgres                  # Utilisateur PostgreSQL
+POSTGRES_PASSWORD=changeme_production   # Mot de passe (à changer en production)
 
-# Backend
-API_PORT=4000
-DATABASE_URL=postgresql://postgres:changeme@db:5432/naturetranquille
+# Backend API
+API_PORT=4000                           # Port du serveur Express
+API_BASE_URL=http://localhost:4000      # URL de base de l'API
 
 # Frontend
-NEXT_PUBLIC_API_URL=http://localhost:4000
-NEXT_PUBLIC_MAPLIBRE_STYLE=https://demotiles.maplibre.org/style.json
+NEXT_PUBLIC_API_URL=http://localhost:4000                    # URL de l'API pour le client
+NEXT_PUBLIC_MAPLIBRE_STYLE=https://demotiles.maplibre.org/style.json  # Style de carte
 ```
+
+Pour la liste complète et les variables optionnelles (SMTP, production), consulter [.env.example](.env.example).
 
 ### Import de données
 
-Les données géospatiales (réserves de chasse, réserves locales) doivent être placées dans `data/raw/` puis importées via un script (Story 0.2, à venir).
+Les données géospatiales (Shapefiles, GeoJSON) doivent être placées dans le dossier `data/raw/` avant d'être importées dans PostgreSQL.
+
+**Procédure d'import :**
+
+1. **Placer les données sources**
+
+    ```bash
+    # Exemple : réserves de chasse de Savoie
+    mkdir -p data/raw/reserves_savoie
+    cp /chemin/vers/fichiers/*.shp data/raw/reserves_savoie/
+    ```
+
+2. **Exécuter le script d'import**
+
+    ```bash
+    chmod +x ./scripts/import-data.sh
+    ./scripts/import-data.sh
+    ```
+
+    Le script utilise `ogr2ogr` (GDAL) pour transformer les données et les charger dans PostGIS avec la projection WGS84 (EPSG:4326).
+
+3. **Vérifier l'import**
+
+    ```bash
+    # Se connecter à PostgreSQL
+    docker compose exec db psql -U postgres -d naturetranquille
+
+    # Compter les zones importées
+    SELECT COUNT(*) FROM zones;
+
+    # Vérifier la validité des géométries
+    SELECT id, ST_IsValid(geometry) FROM zones LIMIT 10;
+    ```
+
+**Note** : Le script d'import est actuellement en développement (Story 0.2). Pour l'instant, l'import se fait manuellement via `ogr2ogr` ou via le code TypeScript dans `backend/src/import/`.
 
 ## 🧪 Tests
 
-Tests unitaires et E2E à venir (Epic suivi).
+**Phase 1 (Actuelle)** : Pas de tests automatisés implémentés.
+
+**Phase 2 (Planifiée)** : Infrastructure de tests complète incluant :
+
+- **Tests unitaires** : Jest pour backend (API, logique métier)
+- **Tests composants** : React Testing Library pour frontend
+- **Tests E2E** : Playwright pour parcours utilisateur critiques
+- **Tests géospatial** : Validation des requêtes PostGIS
+
+Pour plus de détails sur la stratégie de test, consulter la documentation du Epic QA (à venir).
 
 ## 📖 Documentation
 
