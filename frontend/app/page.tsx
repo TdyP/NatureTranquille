@@ -1,8 +1,22 @@
+import dynamic from 'next/dynamic';
+
+const Map = dynamic(() => import('@/components/Map'), {
+    ssr: false,
+    loading: () => (
+        <div className="flex h-full items-center justify-center">
+            <div className="text-center">
+                <div className="mb-2 inline-block h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
+                <p className="text-sm text-muted-foreground">Chargement de la carte...</p>
+            </div>
+        </div>
+    ),
+});
+
 export default function Home() {
     return (
-        <main className="flex min-h-screen flex-col items-center justify-center p-24">
-            <h1 className="text-4xl font-bold mb-4">NatureTranquille</h1>
-            <p className="text-xl text-gray-600">Carte des réserves de chasse en France - En cours de construction</p>
+        <main className="h-full">
+            <Map />
         </main>
     );
 }
+
