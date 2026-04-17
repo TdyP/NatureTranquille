@@ -140,7 +140,8 @@ const Map = forwardRef<MapHandle, MapProps>(function Map(
             map.current.addSource('zones-sans-chasse', {
                 type: 'vector',
                 tiles: [`${tilesUrl}/tiles/{z}/{x}/{y}.mvt`],
-                maxzoom: 14,
+                minzoom: 0,
+                maxzoom: 18,
             });
 
             // Add fill layer with hover state

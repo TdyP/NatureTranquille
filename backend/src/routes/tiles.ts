@@ -56,9 +56,9 @@ const tileCache = new TileCache(1000);
  * Validate tile coordinates
  */
 function validateTileCoordinates(z: number, x: number, y: number): string | null {
-    // Validate z range (0-14)
-    if (z < 0 || z > 14) {
-        return `Invalid z coordinate: ${z}. Must be between 0 and 14.`;
+    // Validate z range (0-18)
+    if (z < 0 || z > 18) {
+        return `Invalid z coordinate: ${z}. Must be between 0 and 18.`;
     }
 
     // Calculate max value for x and y at this zoom level
@@ -98,13 +98,14 @@ async function generateTile(z: number, x: number, y: number): Promise<Buffer | n
                         CASE
                             WHEN $1 BETWEEN 0 AND 6 THEN ST_Simplify(geometry, 0.01)
                             WHEN $1 BETWEEN 7 AND 10 THEN ST_Simplify(geometry, 0.001)
+                            WHEN $1 BETWEEN 11 AND 14 THEN ST_Simplify(geometry, 0.0001)
                             ELSE geometry
                         END,
                         3857
                     ),
                     ST_TileEnvelope($1, $2, $3),
                     4096,
-                    256,
+                    512,
                     true
                 ) AS geom
             FROM zones

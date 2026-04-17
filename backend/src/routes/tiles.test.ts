@@ -32,8 +32,8 @@ describe('Tiles endpoint - Parameter validation', () => {
         assert.ok(response.body.error.includes('z'));
     });
 
-    it('should return 400 for z > 14', async () => {
-        const response = await request(app).get('/tiles/15/0/0.mvt');
+    it('should return 400 for z > 18', async () => {
+        const response = await request(app).get('/tiles/19/0/0.mvt');
         assert.equal(response.status, 400);
         assert.ok(response.body.error.includes('z'));
     });
