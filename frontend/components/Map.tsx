@@ -1,7 +1,7 @@
 'use client';
 
-import {useEffect, useRef, useState} from 'react';
-import maplibregl, {Map as MapLibreMap, MapLayerMouseEvent} from 'maplibre-gl';
+import {useEffect, useRef, useState, useImperativeHandle, forwardRef} from 'react';
+import maplibregl, {Map as MapLibreMap, MapLayerMouseEvent, LngLatBoundsLike} from 'maplibre-gl';
 import 'maplibre-gl/dist/maplibre-gl.css';
 import MapLegend from './MapLegend';
 
@@ -28,21 +28,63 @@ export interface MapProps {
     tilesUrl?: string;
 }
 
+export interface MapHandle {
+    /**
+     * Fly to a specific location with animation
+     */
+    flyToLocation: (lng: number, lat: number, zoom?: number) => void;
+    /**
+     * Fit map to bounds with animation
+     */
+    fitBounds: (bounds: LngLatBoundsLike, padding?: number) => void;
+}
+
 /**
  * Interactive map component using MapLibre GL JS
  * Displays a base OSM map with vector tiles of zones sans chasse
  */
-export default function Map({
-    className = 'h-full w-full',
-    center = [2.2137, 46.2276], // France center
-    zoom = 6,
-    styleUrl = process.env.NEXT_PUBLIC_MAPLIBRE_STYLE || 'https://tiles.openfreemap.org/styles/liberty',
-    tilesUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000',
-}: MapProps) {
+const Map = forwardRef<MapHandle, MapProps>(function Map(
+    {
+        className = 'h-full w-full',
+        center = [2.2137, 46.2276], // France center
+        zoom = 6,
+        styleUrl = process.env.NEXT_PUBLIC_MAPLIBRE_STYLE || 'https://tiles.openfreemap.org/styles/liberty',
+        tilesUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000',
+    },
+    ref
+) {
     const mapContainer = useRef<HTMLDivElement>(null);
     const map = useRef<MapLibreMap | null>(null);
     const [isLoading, setIsLoading] = useState(true);
     const [selectedZoneId, setSelectedZoneId] = useState<number | null>(null);
+
+    // Expose methods to parent component
+    useImperativeHandle(ref, () => ({
+        flyToLocation: (lng: number, lat: number, zoom = 12) => {
+            if (!map.current) return;
+
+            // Check for prefers-reduced-motion
+            const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+            map.current.flyTo({
+                center: [lng, lat],
+                zoom: zoom,
+                duration: prefersReducedMotion ? 0 : 1000,
+            });
+        },
+        fitBounds: (bounds: LngLatBoundsLike, padding = 50) => {
+            if (!map.current) return;
+
+            // Check for prefers-reduced-motion
+            const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+            map.current.fitBounds(bounds, {
+                padding: padding,
+                maxZoom: 12,
+                duration: prefersReducedMotion ? 0 : 1000,
+            });
+        },
+    }));
 
     useEffect(() => {
         if (!mapContainer.current || map.current) return;
@@ -228,5 +270,7 @@ export default function Map({
             <MapLegend />
         </div>
     );
-}
+});
+
+export default Map;
 

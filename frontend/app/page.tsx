@@ -1,4 +1,9 @@
+'use client';
+
+import {useRef} from 'react';
 import dynamic from 'next/dynamic';
+import SearchBar, {AddressSearchResult} from '@/components/SearchBar';
+import {MapHandle} from '@/components/Map';
 
 const Map = dynamic(() => import('@/components/Map'), {
     ssr: false,
@@ -13,9 +18,30 @@ const Map = dynamic(() => import('@/components/Map'), {
 });
 
 export default function Home() {
+    const mapRef = useRef<MapHandle>(null);
+
+    const handleLocationSelect = (result: AddressSearchResult) => {
+        if (!mapRef.current) return;
+
+        const [lng, lat] = result.geometry.coordinates;
+
+        // If bbox is available, use fitBounds for better viewport
+        if (result.bbox) {
+            mapRef.current.fitBounds(result.bbox as [number, number, number, number], 50);
+        } else {
+            // Otherwise, fly to the point with zoom 12
+            mapRef.current.flyToLocation(lng, lat, 12);
+        }
+    };
+
     return (
-        <main className="h-full">
-            <Map />
+        <main className="relative h-full">
+            {/* Search bar overlay */}
+            <div className="absolute left-1/2 top-4 z-10 w-full max-w-md -translate-x-1/2 px-4 sm:px-0">
+                <SearchBar onSelectLocation={handleLocationSelect} className="shadow-lg" />
+            </div>
+
+            <Map ref={mapRef} />
         </main>
     );
 }
