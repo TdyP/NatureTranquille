@@ -12,7 +12,7 @@ export default function MapLegend() {
             <ul className="space-y-2 text-sm">
                 <li className="flex items-center gap-2">
                     <div className="h-4 w-4 rounded-sm border-2 border-zone-stroke bg-zone-fill opacity-60" />
-                    <span>Zone sans chasse identifiée</span>
+                    <span>Réserve de chasse</span>
                 </li>
                 <li className="flex items-center gap-2">
                     <div className="h-4 w-4 rounded-sm border-2 border-border bg-background" />

@@ -19,7 +19,7 @@ describe('MapLegend Component', () => {
     it('displays zone sans chasse entry', () => {
         render(<MapLegend />);
 
-        expect(screen.getByText('Zone sans chasse identifiée')).toBeInTheDocument();
+        expect(screen.getByText('Réserve de chasse')).toBeInTheDocument();
     });
 
     it('displays no data entry with explanation', () => {
