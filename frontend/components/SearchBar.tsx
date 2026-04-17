@@ -247,17 +247,17 @@ export default function SearchBar({
     return (
         <div className={`relative ${className}`}>
             <Command
-                className="overflow-visible bg-transparent"
+                className="overflow-visible rounded-md border bg-background shadow-sm"
                 shouldFilter={false}
                 label="Rechercher un lieu"
             >
-                <div className="relative">
+                <div className="relative bg-background">
                     <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                     <CommandInput
                         value={query}
                         onValueChange={setQuery}
                         placeholder={placeholder}
-                        className="h-10 pl-9 pr-9"
+                        className="h-10 pl-9 pr-9 bg-background"
                         aria-busy={isLoading}
                         aria-invalid={!!error}
                         aria-describedby={error ? 'search-error' : undefined}

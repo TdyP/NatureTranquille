@@ -59,32 +59,42 @@ const Map = forwardRef<MapHandle, MapProps>(function Map(
     const [selectedZoneId, setSelectedZoneId] = useState<number | null>(null);
 
     // Expose methods to parent component
-    useImperativeHandle(ref, () => ({
-        flyToLocation: (lng: number, lat: number, zoom = 12) => {
-            if (!map.current) return;
+    useImperativeHandle(
+        ref,
+        () => ({
+            flyToLocation: (lng: number, lat: number, zoom = 12) => {
+                if (!map.current) {
+                    console.warn('Map not yet initialized');
+                    return;
+                }
 
-            // Check for prefers-reduced-motion
-            const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+                // Check for prefers-reduced-motion
+                const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-            map.current.flyTo({
-                center: [lng, lat],
-                zoom: zoom,
-                duration: prefersReducedMotion ? 0 : 1000,
-            });
-        },
-        fitBounds: (bounds: LngLatBoundsLike, padding = 50) => {
-            if (!map.current) return;
+                map.current.flyTo({
+                    center: [lng, lat],
+                    zoom: zoom,
+                    duration: prefersReducedMotion ? 0 : 1000,
+                });
+            },
+            fitBounds: (bounds: LngLatBoundsLike, padding = 50) => {
+                if (!map.current) {
+                    console.warn('Map not yet initialized');
+                    return;
+                }
 
-            // Check for prefers-reduced-motion
-            const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+                // Check for prefers-reduced-motion
+                const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-            map.current.fitBounds(bounds, {
-                padding: padding,
-                maxZoom: 12,
-                duration: prefersReducedMotion ? 0 : 1000,
-            });
-        },
-    }));
+                map.current.fitBounds(bounds, {
+                    padding: padding,
+                    maxZoom: 12,
+                    duration: prefersReducedMotion ? 0 : 1000,
+                });
+            },
+        }),
+        []
+    );
 
     useEffect(() => {
         if (!mapContainer.current || map.current) return;
