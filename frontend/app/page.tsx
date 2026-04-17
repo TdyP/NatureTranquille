@@ -1,6 +1,6 @@
 'use client';
 
-import {useRef} from 'react';
+import {useRef, useCallback} from 'react';
 import dynamic from 'next/dynamic';
 import SearchBar, {AddressSearchResult} from '@/components/SearchBar';
 import {MapHandle} from '@/components/Map';
@@ -18,21 +18,34 @@ const Map = dynamic(() => import('@/components/Map'), {
 });
 
 export default function Home() {
-    const mapRef = useRef<MapHandle>(null);
+    const mapHandleRef = useRef<MapHandle | null>(null);
 
-    const handleLocationSelect = (result: AddressSearchResult) => {
-        if (!mapRef.current) return;
+    const handleMapReady = useCallback((handle: MapHandle) => {
+        console.log('Map is ready!');
+        mapHandleRef.current = handle;
+    }, []);
+
+    const handleLocationSelect = useCallback((result: AddressSearchResult) => {
+        console.log('Location selected:', result.properties.label);
+        console.log('Map handle:', mapHandleRef.current);
+
+        if (!mapHandleRef.current) {
+            console.error('Map not ready yet!');
+            return;
+        }
 
         const [lng, lat] = result.geometry.coordinates;
 
         // If bbox is available, use fitBounds for better viewport
         if (result.bbox) {
-            mapRef.current.fitBounds(result.bbox as [number, number, number, number], 50);
+            console.log('Using fitBounds with bbox:', result.bbox);
+            mapHandleRef.current.fitBounds(result.bbox as [number, number, number, number], 50);
         } else {
             // Otherwise, fly to the point with zoom 12
-            mapRef.current.flyToLocation(lng, lat, 12);
+            console.log('Using flyToLocation:', lng, lat);
+            mapHandleRef.current.flyToLocation(lng, lat, 12);
         }
-    };
+    }, []);
 
     return (
         <main className="relative h-full">
@@ -41,7 +54,7 @@ export default function Home() {
                 <SearchBar onSelectLocation={handleLocationSelect} className="shadow-lg" />
             </div>
 
-            <Map ref={mapRef} />
+            <Map onMapReady={handleMapReady} />
         </main>
     );
 }

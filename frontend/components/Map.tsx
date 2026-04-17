@@ -26,6 +26,10 @@ export interface MapProps {
      * MVT tiles base URL
      */
     tilesUrl?: string;
+    /**
+     * Callback when map is ready
+     */
+    onMapReady?: (handle: MapHandle) => void;
 }
 
 export interface MapHandle {
@@ -50,6 +54,7 @@ const Map = forwardRef<MapHandle, MapProps>(function Map(
         zoom = 6,
         styleUrl = process.env.NEXT_PUBLIC_MAPLIBRE_STYLE || 'https://tiles.openfreemap.org/styles/liberty',
         tilesUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000',
+        onMapReady,
     },
     ref
 ) {
@@ -58,43 +63,42 @@ const Map = forwardRef<MapHandle, MapProps>(function Map(
     const [isLoading, setIsLoading] = useState(true);
     const [selectedZoneId, setSelectedZoneId] = useState<number | null>(null);
 
-    // Expose methods to parent component
-    useImperativeHandle(
-        ref,
-        () => ({
-            flyToLocation: (lng: number, lat: number, zoom = 12) => {
-                if (!map.current) {
-                    console.warn('Map not yet initialized');
-                    return;
-                }
+    // Create map handle
+    const mapHandle: MapHandle = {
+        flyToLocation: (lng: number, lat: number, zoom = 12) => {
+            if (!map.current) {
+                console.warn('Map not yet initialized');
+                return;
+            }
 
-                // Check for prefers-reduced-motion
-                const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+            // Check for prefers-reduced-motion
+            const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-                map.current.flyTo({
-                    center: [lng, lat],
-                    zoom: zoom,
-                    duration: prefersReducedMotion ? 0 : 1000,
-                });
-            },
-            fitBounds: (bounds: LngLatBoundsLike, padding = 50) => {
-                if (!map.current) {
-                    console.warn('Map not yet initialized');
-                    return;
-                }
+            map.current.flyTo({
+                center: [lng, lat],
+                zoom: zoom,
+                duration: prefersReducedMotion ? 0 : 1000,
+            });
+        },
+        fitBounds: (bounds: LngLatBoundsLike, padding = 50) => {
+            if (!map.current) {
+                console.warn('Map not yet initialized');
+                return;
+            }
 
-                // Check for prefers-reduced-motion
-                const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+            // Check for prefers-reduced-motion
+            const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-                map.current.fitBounds(bounds, {
-                    padding: padding,
-                    maxZoom: 12,
-                    duration: prefersReducedMotion ? 0 : 1000,
-                });
-            },
-        }),
-        []
-    );
+            map.current.fitBounds(bounds, {
+                padding: padding,
+                maxZoom: 12,
+                duration: prefersReducedMotion ? 0 : 1000,
+            });
+        },
+    };
+
+    // Expose methods to parent component via ref
+    useImperativeHandle(ref, () => mapHandle, []);
 
     useEffect(() => {
         if (!mapContainer.current || map.current) return;
@@ -247,6 +251,9 @@ const Map = forwardRef<MapHandle, MapProps>(function Map(
             });
 
             setIsLoading(false);
+
+            // Notify parent that map is ready
+            onMapReady?.(mapHandle);
         });
 
         // Cleanup on unmount
@@ -254,6 +261,7 @@ const Map = forwardRef<MapHandle, MapProps>(function Map(
             map.current?.remove();
             map.current = null;
         };
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [center, zoom, styleUrl, tilesUrl, selectedZoneId]);
 
     return (
