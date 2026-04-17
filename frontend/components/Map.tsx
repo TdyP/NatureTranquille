@@ -266,7 +266,7 @@ const Map = forwardRef<MapHandle, MapProps>(function Map(
             map.current = null;
         };
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [center, zoom, styleUrl, tilesUrl, selectedZone]);
+    }, [center, zoom, styleUrl, tilesUrl]);
 
     // Handle zone details close
     const handleCloseZoneDetails = () => {

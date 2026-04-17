@@ -1,6 +1,6 @@
 'use client';
 
-import {Sheet, SheetContent, SheetHeader, SheetTitle} from '@/components/ui/sheet';
+import {Sheet, SheetContent, SheetHeader, SheetTitle, SheetPortal, SheetOverlay} from '@/components/ui/sheet';
 
 /**
  * Zone properties from MVT tiles
@@ -55,7 +55,9 @@ export default function ZoneDetails({zone, onClose}: ZoneDetailsProps) {
 
     return (
         <Sheet open={isOpen} onOpenChange={(open) => !open && onClose()}>
-            <SheetContent side="left" className="w-full lg:w-[400px]">
+            <SheetPortal>
+                <SheetOverlay className="bg-background/20 backdrop-blur-none" />
+                <SheetContent side="left" className="w-full lg:w-[400px]">
                 <SheetHeader>
                     <SheetTitle id="zone-title">{zone.nom}</SheetTitle>
                 </SheetHeader>
@@ -83,7 +85,8 @@ export default function ZoneDetails({zone, onClose}: ZoneDetailsProps) {
                         </div>
                     </dl>
                 </div>
-            </SheetContent>
+                </SheetContent>
+            </SheetPortal>
         </Sheet>
     );
 }
