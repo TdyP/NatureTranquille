@@ -110,7 +110,7 @@ async function generateTile(z: number, x: number, y: number): Promise<Buffer | n
             FROM zones
             WHERE geometry && ST_Transform(ST_TileEnvelope($1, $2, $3), 4326)
         )
-        SELECT ST_AsMVT(mvtgeom.*, 'zones') as tile FROM mvtgeom;
+        SELECT ST_AsMVT(mvtgeom.*, 'zones', 4096, 'geom', 'id') as tile FROM mvtgeom;
     `;
 
     try {
