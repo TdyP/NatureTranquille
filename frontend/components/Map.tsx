@@ -36,7 +36,7 @@ export default function Map({
     className = 'h-full w-full',
     center = [2.2137, 46.2276], // France center
     zoom = 6,
-    styleUrl = process.env.NEXT_PUBLIC_MAPLIBRE_STYLE || 'https://demotiles.maplibre.org/style.json',
+    styleUrl = process.env.NEXT_PUBLIC_MAPLIBRE_STYLE || 'https://tiles.openfreemap.org/styles/liberty',
     tilesUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000',
 }: MapProps) {
     const mapContainer = useRef<HTMLDivElement>(null);
@@ -94,7 +94,7 @@ export default function Map({
                 source: 'zones-sans-chasse',
                 'source-layer': 'zones',
                 paint: {
-                    'fill-color': 'hsl(var(--zone-fill))',
+                    'fill-color': '#10b981',
                     'fill-opacity': [
                         'case',
                         ['boolean', ['feature-state', 'hover'], false],
@@ -116,8 +116,8 @@ export default function Map({
                     'line-color': [
                         'case',
                         ['boolean', ['feature-state', 'selected'], false],
-                        'hsl(var(--zone-selected))',
-                        'hsl(var(--zone-stroke))',
+                        '#047857',
+                        '#059669',
                     ],
                     'line-width': ['case', ['boolean', ['feature-state', 'selected'], false], 3, 2],
                 },
