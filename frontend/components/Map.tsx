@@ -4,6 +4,7 @@ import {useEffect, useRef, useState, useImperativeHandle, forwardRef} from 'reac
 import maplibregl, {Map as MapLibreMap, MapLayerMouseEvent, LngLatBoundsLike} from 'maplibre-gl';
 import 'maplibre-gl/dist/maplibre-gl.css';
 import MapLegend from './MapLegend';
+import ZoneDetails, {ZoneProperties} from './ZoneDetails';
 
 export interface MapProps {
     /**
@@ -61,7 +62,7 @@ const Map = forwardRef<MapHandle, MapProps>(function Map(
     const mapContainer = useRef<HTMLDivElement>(null);
     const map = useRef<MapLibreMap | null>(null);
     const [isLoading, setIsLoading] = useState(true);
-    const [selectedZoneId, setSelectedZoneId] = useState<number | null>(null);
+    const [selectedZone, setSelectedZone] = useState<ZoneProperties | null>(null);
 
     // Create map handle
     const mapHandle: MapHandle = {
@@ -235,19 +236,21 @@ const Map = forwardRef<MapHandle, MapProps>(function Map(
             map.current.on('click', 'zones-fill', (e: MapLayerMouseEvent) => {
                 if (!map.current || !e.features || e.features.length === 0) return;
 
-                const clickedId = e.features[0].id as number;
+                const clickedFeature = e.features[0];
+                const clickedId = clickedFeature.id as number;
+                const properties = clickedFeature.properties as ZoneProperties;
 
                 // Clear previous selection
-                if (selectedZoneId !== null) {
-                    map.current.setFeatureState({source: 'zones-sans-chasse', sourceLayer: 'zones', id: selectedZoneId}, {selected: false});
+                if (selectedZone !== null) {
+                    map.current.setFeatureState({source: 'zones-sans-chasse', sourceLayer: 'zones', id: selectedZone.id}, {selected: false});
                 }
 
                 // Set new selection
-                if (selectedZoneId !== clickedId) {
+                if (selectedZone?.id !== clickedId) {
                     map.current.setFeatureState({source: 'zones-sans-chasse', sourceLayer: 'zones', id: clickedId}, {selected: true});
-                    setSelectedZoneId(clickedId);
+                    setSelectedZone({...properties, id: clickedId});
                 } else {
-                    setSelectedZoneId(null);
+                    setSelectedZone(null);
                 }
             });
 
@@ -263,7 +266,16 @@ const Map = forwardRef<MapHandle, MapProps>(function Map(
             map.current = null;
         };
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [center, zoom, styleUrl, tilesUrl, selectedZoneId]);
+    }, [center, zoom, styleUrl, tilesUrl, selectedZone]);
+
+    // Handle zone details close
+    const handleCloseZoneDetails = () => {
+        if (!map.current || !selectedZone) return;
+
+        // Clear selection state
+        map.current.setFeatureState({source: 'zones-sans-chasse', sourceLayer: 'zones', id: selectedZone.id}, {selected: false});
+        setSelectedZone(null);
+    };
 
     return (
         <div className="relative h-full w-full">
@@ -287,6 +299,7 @@ const Map = forwardRef<MapHandle, MapProps>(function Map(
                 tabIndex={0}
             />
             <MapLegend />
+            <ZoneDetails zone={selectedZone} onClose={handleCloseZoneDetails} />
         </div>
     );
 });
