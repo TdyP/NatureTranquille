@@ -57,7 +57,7 @@ const Map = forwardRef<MapHandle, MapProps>(function Map(
         tilesUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000',
         onMapReady,
     },
-    ref
+    ref,
 ) {
     const mapContainer = useRef<HTMLDivElement>(null);
     const map = useRef<MapLibreMap | null>(null);
@@ -172,12 +172,7 @@ const Map = forwardRef<MapHandle, MapProps>(function Map(
                 source: 'zones-sans-chasse',
                 'source-layer': 'zones',
                 paint: {
-                    'line-color': [
-                        'case',
-                        ['boolean', ['feature-state', 'selected'], false],
-                        '#047857',
-                        '#059669',
-                    ],
+                    'line-color': ['case', ['boolean', ['feature-state', 'selected'], false], '#047857', '#059669'],
                     'line-width': ['case', ['boolean', ['feature-state', 'selected'], false], 3, 2],
                 },
             });
@@ -220,16 +215,25 @@ const Map = forwardRef<MapHandle, MapProps>(function Map(
                 if (!map.current) return;
                 if (e.features && e.features.length > 0) {
                     if (hoveredStateId !== null) {
-                        map.current.setFeatureState({source: 'zones-sans-chasse', sourceLayer: 'zones', id: hoveredStateId}, {hover: false});
+                        map.current.setFeatureState(
+                            {source: 'zones-sans-chasse', sourceLayer: 'zones', id: hoveredStateId},
+                            {hover: false},
+                        );
                     }
                     hoveredStateId = e.features[0].id as number;
-                    map.current.setFeatureState({source: 'zones-sans-chasse', sourceLayer: 'zones', id: hoveredStateId}, {hover: true});
+                    map.current.setFeatureState(
+                        {source: 'zones-sans-chasse', sourceLayer: 'zones', id: hoveredStateId},
+                        {hover: true},
+                    );
                 }
             });
 
             map.current.on('mouseleave', 'zones-fill', () => {
                 if (!map.current || hoveredStateId === null) return;
-                map.current.setFeatureState({source: 'zones-sans-chasse', sourceLayer: 'zones', id: hoveredStateId}, {hover: false});
+                map.current.setFeatureState(
+                    {source: 'zones-sans-chasse', sourceLayer: 'zones', id: hoveredStateId},
+                    {hover: false},
+                );
                 hoveredStateId = null;
             });
 
@@ -241,14 +245,12 @@ const Map = forwardRef<MapHandle, MapProps>(function Map(
                 const clickedId = clickedFeature.id as number;
                 const properties = clickedFeature.properties as ZoneProperties;
 
-                // Clear previous selection using ref
-                if (selectedZoneIdRef.current !== null) {
-                    map.current.setFeatureState({source: 'zones-sans-chasse', sourceLayer: 'zones', id: selectedZoneIdRef.current}, {selected: false});
-                }
-
                 // Set new selection
                 if (selectedZoneIdRef.current !== clickedId) {
-                    map.current.setFeatureState({source: 'zones-sans-chasse', sourceLayer: 'zones', id: clickedId}, {selected: true});
+                    map.current.setFeatureState(
+                        {source: 'zones-sans-chasse', sourceLayer: 'zones', id: clickedId},
+                        {selected: true},
+                    );
                     selectedZoneIdRef.current = clickedId;
                     setSelectedZone({...properties, id: clickedId});
                 } else {
@@ -269,14 +271,17 @@ const Map = forwardRef<MapHandle, MapProps>(function Map(
             map.current = null;
         };
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [center, zoom, styleUrl, tilesUrl]);
+    }, []); // Initialize map once - center/zoom are initial values, controlled imperatively after
 
     // Handle zone details close
     const handleCloseZoneDetails = () => {
         if (!map.current || selectedZoneIdRef.current === null) return;
 
         // Clear selection state using ref
-        map.current.setFeatureState({source: 'zones-sans-chasse', sourceLayer: 'zones', id: selectedZoneIdRef.current}, {selected: false});
+        map.current.setFeatureState(
+            {source: 'zones-sans-chasse', sourceLayer: 'zones', id: selectedZoneIdRef.current},
+            {selected: false},
+        );
         selectedZoneIdRef.current = null;
         setSelectedZone(null);
     };
@@ -309,4 +314,3 @@ const Map = forwardRef<MapHandle, MapProps>(function Map(
 });
 
 export default Map;
-
