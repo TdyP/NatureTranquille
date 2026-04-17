@@ -63,6 +63,7 @@ const Map = forwardRef<MapHandle, MapProps>(function Map(
     const map = useRef<MapLibreMap | null>(null);
     const [isLoading, setIsLoading] = useState(true);
     const [selectedZone, setSelectedZone] = useState<ZoneProperties | null>(null);
+    const selectedZoneIdRef = useRef<number | null>(null);
 
     // Create map handle
     const mapHandle: MapHandle = {
@@ -240,16 +241,18 @@ const Map = forwardRef<MapHandle, MapProps>(function Map(
                 const clickedId = clickedFeature.id as number;
                 const properties = clickedFeature.properties as ZoneProperties;
 
-                // Clear previous selection
-                if (selectedZone !== null) {
-                    map.current.setFeatureState({source: 'zones-sans-chasse', sourceLayer: 'zones', id: selectedZone.id}, {selected: false});
+                // Clear previous selection using ref
+                if (selectedZoneIdRef.current !== null) {
+                    map.current.setFeatureState({source: 'zones-sans-chasse', sourceLayer: 'zones', id: selectedZoneIdRef.current}, {selected: false});
                 }
 
                 // Set new selection
-                if (selectedZone?.id !== clickedId) {
+                if (selectedZoneIdRef.current !== clickedId) {
                     map.current.setFeatureState({source: 'zones-sans-chasse', sourceLayer: 'zones', id: clickedId}, {selected: true});
+                    selectedZoneIdRef.current = clickedId;
                     setSelectedZone({...properties, id: clickedId});
                 } else {
+                    selectedZoneIdRef.current = null;
                     setSelectedZone(null);
                 }
             });
@@ -270,10 +273,11 @@ const Map = forwardRef<MapHandle, MapProps>(function Map(
 
     // Handle zone details close
     const handleCloseZoneDetails = () => {
-        if (!map.current || !selectedZone) return;
+        if (!map.current || selectedZoneIdRef.current === null) return;
 
-        // Clear selection state
-        map.current.setFeatureState({source: 'zones-sans-chasse', sourceLayer: 'zones', id: selectedZone.id}, {selected: false});
+        // Clear selection state using ref
+        map.current.setFeatureState({source: 'zones-sans-chasse', sourceLayer: 'zones', id: selectedZoneIdRef.current}, {selected: false});
+        selectedZoneIdRef.current = null;
         setSelectedZone(null);
     };
 
