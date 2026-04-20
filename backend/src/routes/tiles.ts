@@ -96,9 +96,9 @@ async function generateTile(z: number, x: number, y: number): Promise<Buffer | n
                 ST_AsMVTGeom(
                     ST_Transform(
                         CASE
-                            WHEN $1 BETWEEN 0 AND 6 THEN ST_Simplify(geometry, 0.01)
-                            WHEN $1 BETWEEN 7 AND 10 THEN ST_Simplify(geometry, 0.001)
-                            WHEN $1 BETWEEN 11 AND 14 THEN ST_Simplify(geometry, 0.0001)
+                            WHEN $1 BETWEEN 0 AND 6 THEN ST_SimplifyPreserveTopology(geometry, 0.01)
+                            WHEN $1 BETWEEN 7 AND 10 THEN ST_SimplifyPreserveTopology(geometry, 0.001)
+                            WHEN $1 BETWEEN 11 AND 14 THEN ST_SimplifyPreserveTopology(geometry, 0.0001)
                             ELSE geometry
                         END,
                         3857
