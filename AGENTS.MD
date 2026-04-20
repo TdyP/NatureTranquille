@@ -24,3 +24,9 @@
 ## Lancement de l'app
 
 - N'essaye de pas de lancer l'app. Je m'en occupe.
+
+## Commits
+
+- Commits clairs et descriptifs, en anglais, en suivant la conventional commits (feat, fix, docs, etc.)
+- Commits uniquement sur demande.
+- JAMAIS de push, sauf demande explicite.

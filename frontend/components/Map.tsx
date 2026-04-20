@@ -157,10 +157,10 @@ const Map = forwardRef<MapHandle, MapProps>(function Map(
                     'fill-opacity': [
                         'case',
                         ['boolean', ['feature-state', 'hover'], false],
-                        0.8,
+                        0.5,
                         ['boolean', ['feature-state', 'selected'], false],
-                        1,
                         0.6,
+                        0.3,
                     ],
                 },
             });
