@@ -4,6 +4,7 @@ import {useRef, useCallback} from 'react';
 import dynamic from 'next/dynamic';
 import SearchBar, {AddressSearchResult} from '@/components/SearchBar';
 import {MapHandle} from '@/components/Map';
+import DisclaimerModal from '@/components/DisclaimerModal';
 
 const Map = dynamic(() => import('@/components/Map'), {
     ssr: false,
@@ -49,6 +50,8 @@ export default function Home() {
 
     return (
         <main className="relative h-full">
+            <DisclaimerModal />
+
             {/* Search bar overlay */}
             <div className="absolute left-1/2 top-4 z-10 w-full max-w-md -translate-x-1/2 px-4 sm:px-0">
                 <SearchBar onSelectLocation={handleLocationSelect} className="shadow-lg" />
