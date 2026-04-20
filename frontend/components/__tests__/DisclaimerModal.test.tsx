@@ -18,9 +18,7 @@ describe('DisclaimerModal', () => {
         it('displays the partial data warning message', () => {
             render(<DisclaimerModal />);
 
-            expect(
-                screen.getByText(/Cette carte affiche uniquement les réserves de chasse/),
-            ).toBeInTheDocument();
+            expect(screen.getByText(/Cette carte affiche uniquement les réserves de chasse/)).toBeInTheDocument();
             expect(
                 screen.getByText(/L'absence d'une zone verte ne signifie PAS que la chasse y est autorisée/),
             ).toBeInTheDocument();

@@ -35,27 +35,26 @@ export default function DisclaimerModal() {
 
     return (
         <AlertDialog open={showDisclaimer} onOpenChange={() => {}}>
-            <AlertDialogContent
-                className="max-w-md"
-                onEscapeKeyDown={(e) => e.preventDefault()}
-            >
+            <AlertDialogContent className="max-w-md" onEscapeKeyDown={(e) => e.preventDefault()}>
                 <AlertDialogHeader>
                     <AlertDialogTitle className="flex items-center gap-2">
                         <AlertTriangle className="h-5 w-5 text-yellow-500" aria-hidden="true" />
                         Important : Données partielles
                     </AlertDialogTitle>
                     <AlertDialogDescription asChild>
-                        <div className="space-y-3">
+                        <div className="space-y-5">
                             <p>
                                 Cette carte affiche uniquement les réserves de chasse que nous avons pu identifier et
                                 valider.
                             </p>
-                            <ul className="space-y-1">
+                            <ul className="space-y-4">
                                 <li>
-                                    ❌ L&apos;absence d&apos;une zone verte ne signifie PAS que la chasse y est
-                                    autorisée
+                                    ✅ La présence d&apos;une zone verte indique une protection officielle confirmée
                                 </li>
-                                <li>✅ La présence d&apos;une zone verte indique une protection officielle confirmée</li>
+                                <li>
+                                    ❌ L&apos;absence d&apos;une zone verte ne signifie pas que la chasse y est
+                                    autorisée. Cela peut être dû à un manque de données.
+                                </li>
                             </ul>
                             <p className="text-sm">
                                 En cas de doute, vérifiez localement auprès des autorités ou des habitants.
@@ -74,9 +73,7 @@ export default function DisclaimerModal() {
                             Ne plus afficher ce message
                         </label>
                     </div>
-                    <AlertDialogAction onClick={handleAccept}>
-                        J&apos;ai compris
-                    </AlertDialogAction>
+                    <AlertDialogAction onClick={handleAccept}>J&apos;ai compris</AlertDialogAction>
                 </AlertDialogFooter>
             </AlertDialogContent>
         </AlertDialog>

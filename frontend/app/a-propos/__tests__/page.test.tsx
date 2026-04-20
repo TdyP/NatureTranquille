@@ -6,9 +6,7 @@ describe('AProposPage', () => {
         it('renders the main heading', () => {
             render(<AProposPage />);
 
-            expect(
-                screen.getByRole('heading', {level: 1, name: 'À propos de NatureTranquille'}),
-            ).toBeInTheDocument();
+            expect(screen.getByRole('heading', {level: 1, name: 'À propos de NatureTranquille'})).toBeInTheDocument();
         });
 
         it('renders all sections with correct headings', () => {
