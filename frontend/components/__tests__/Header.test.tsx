@@ -71,7 +71,7 @@ describe('Header Component', () => {
 
         expect(accueilLink).toHaveAttribute('href', '/');
         expect(sourcesLink).toHaveAttribute('href', '/sources');
-        expect(aboutLink).toHaveAttribute('href', '/about');
+        expect(aboutLink).toHaveAttribute('href', '/a-propos');
         expect(feedbackLink).toHaveAttribute('href', '/feedback');
     });
 });
