@@ -1,4 +1,3 @@
-import {createHash} from 'crypto';
 import {NextRequest, NextResponse} from 'next/server';
 import nodemailer from 'nodemailer';
 import {feedbackSchema} from '@/lib/validations/feedback';
@@ -6,18 +5,7 @@ import {db} from '@/lib/db/client';
 import {signalements} from '@/lib/db/schema';
 import {and, gt, count} from 'drizzle-orm';
 import {sql} from 'drizzle-orm';
-
-function hashIp(ip: string): string {
-    return createHash('sha256').update(ip).digest('hex');
-}
-
-function getClientIp(request: NextRequest): string {
-    return (
-        request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ||
-        request.headers.get('x-real-ip') ||
-        'unknown'
-    );
-}
+import {hashIp, getClientIp, isHoneypotFilled} from '@/lib/spam-protection';
 
 function createMailTransporter() {
     const host = process.env.SMTP_HOST;
@@ -79,7 +67,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     const data = parsed.data;
 
     // Honeypot check — bots fill this hidden field
-    if (data.website) {
+    if (isHoneypotFilled(data.website)) {
         return NextResponse.json({error: 'Spam detected'}, {status: 400});
     }
 
