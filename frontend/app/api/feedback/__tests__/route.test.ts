@@ -6,10 +6,10 @@ import {POST} from '../route';
 import {NextRequest} from 'next/server';
 
 jest.mock('@/lib/db/client', () => ({
-    db: {
+    getDb: jest.fn(() => ({
         select: jest.fn(),
         insert: jest.fn(),
-    },
+    })),
 }));
 
 jest.mock('@/lib/db/schema', () => ({
@@ -33,7 +33,7 @@ jest.mock('nodemailer', () => {
     };
 });
 
-const mockDb = jest.requireMock('@/lib/db/client').db;
+const mockGetDb = jest.requireMock('@/lib/db/client').getDb;
 
 function buildRequest(body: unknown, headers: Record<string, string> = {}): NextRequest {
     return new NextRequest('http://localhost/api/feedback', {
@@ -51,8 +51,11 @@ function setupDbMocks(recentCount = 0) {
     const insertValues = jest.fn().mockResolvedValue([]);
     const selectFromWhere = {where: jest.fn().mockResolvedValue([{count: recentCount}])};
     const selectFrom = {from: jest.fn().mockReturnValue(selectFromWhere)};
-    mockDb.select.mockReturnValue(selectFrom);
-    mockDb.insert.mockReturnValue({values: insertValues});
+    const mockDb = {
+        select: jest.fn().mockReturnValue(selectFrom),
+        insert: jest.fn().mockReturnValue({values: insertValues}),
+    };
+    mockGetDb.mockReturnValue(mockDb);
     return {insertValues, selectFrom, selectFromWhere};
 }
 

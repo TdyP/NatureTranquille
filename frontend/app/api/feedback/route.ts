@@ -1,7 +1,7 @@
 import {NextRequest, NextResponse} from 'next/server';
 import nodemailer from 'nodemailer';
 import {feedbackSchema} from '@/lib/validations/feedback';
-import {db} from '@/lib/db/client';
+import {getDb} from '@/lib/db/client';
 import {signalements} from '@/lib/db/schema';
 import {and, gt, count} from 'drizzle-orm';
 import {sql} from 'drizzle-orm';
@@ -76,6 +76,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
 
     // Rate limiting: 1 request per minute per IP
     const oneMinuteAgo = new Date(Date.now() - 60 * 1000);
+    const db = getDb();
     const recentCount = await db
         .select({count: count()})
         .from(signalements)
