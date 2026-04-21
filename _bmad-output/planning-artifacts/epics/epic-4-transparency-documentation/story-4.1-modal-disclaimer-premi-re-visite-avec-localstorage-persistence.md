@@ -1,6 +1,5 @@
 ### Story 4.1: Modal disclaimer première visite avec localStorage persistence
 
-
 **User Story**
 En tant que **Tom (première visite)**, je veux voir immédiatement un message clair m'expliquant que la carte montre seulement les zones connues et que l'absence de zone ne signifie pas autorisation de chasse, afin de ne pas avoir de faux sentiment de sécurité.
 
@@ -56,8 +55,11 @@ useEffect(() => {
             <AlertDialogDescription className="space-y-3">
                 <p>Cette carte affiche uniquement les zones sans chasse que nous avons pu identifier et valider.</p>
                 <ul className="space-y-1">
-                    <li>❌ L'absence d'une zone verte ne signifie PAS que la chasse y est autorisée</li>
                     <li>✅ La présence d'une zone verte indique une protection officielle confirmée</li>
+                    <li>
+                        ❌ L'absence d'une zone verte ne signifie PAS que la chasse y est autorisée. Cela peut aussi
+                        être un manque de données.
+                    </li>
                 </ul>
                 <p className="text-sm">Avant toute activité, vérifiez toujours localement.</p>
             </AlertDialogDescription>
@@ -91,4 +93,3 @@ useEffect(() => {
 - Pas d'appel API (logique 100% client)
 
 ---
-

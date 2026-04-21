@@ -1,5 +1,5 @@
 ---
-stepsCompleted: ['step-01-validate-prerequisites', 'step-02-design-epics']
+stepsCompleted: ['step-01-validate-prerequisites', 'step-02-design-epics', 'step-02-add-epic-7-analytics']
 inputDocuments:
     - '_bmad-output/planning-artifacts/prd.md'
     - '_bmad-output/planning-artifacts/architecture.md'
@@ -93,6 +93,12 @@ Ce document fournit la décomposition complète en epics et stories pour NatureT
 **FR38** : Le système peut servir les données cartographiques au format tuiles vectorielles optimisé pour performance
 
 **FR39** : Le système peut régénérer les pages statiques périodiquement pour intégrer nouvelles données (rebuild automatique via scripts)
+
+**FR40** : Le système intègre Umami comme outil d'analytics anonymes, sans cookies tiers, conforme RGPD, via le script de tracking ajouté au layout global Next.js
+
+**FR41** : Le système déclenche un événement analytics custom lors de la sélection d'une adresse dans les suggestions de recherche
+
+**FR42** : Le système déclenche un événement analytics custom lors du clic d'un utilisateur sur une zone de la carte
 
 ### NonFunctional Requirements
 
@@ -391,6 +397,9 @@ FR36 → Epic 0 (stockage projection WGS84)
 FR37 → Epic 0 (métadonnées source/date)
 FR38 → Epic 1 (tuiles vectorielles MVT)
 FR39 → Epic 0 (rebuild pages statiques)
+FR40 → Epic 7 (intégration Umami analytics)
+FR41 → Epic 7 (événement custom sélection adresse)
+FR42 → Epic 7 (événement custom clic zone)
 
 **Exigences Accessibilité (FR21-FR28) - TRANSVERSALES :**
 
@@ -405,7 +414,7 @@ FR26 → Skip link navigation (Epic 1, Epic 4)
 FR27 → Contrastes WCAG AA (toutes stories UI)
 FR28 → Structure HTML sémantique + ARIA (toutes stories UI)
 
-**Couverture totale : 39/39 FRs** ✅
+**Couverture totale : 42/42 FRs** ✅
 
 ## Epic List
 
@@ -611,11 +620,35 @@ FR28 → Structure HTML sémantique + ARIA (toutes stories UI)
 - Robots.txt + sitemap.xml build-time
 - Google Search Console monitoring
 
+### Epic 7: Analytics & Tracking Umami
+
+**Valeur Utilisateur** : L'équipe produit dispose de données analytiques anonymes et RGPD-conformes pour mesurer l'usage de la carte, comprendre les comportements de recherche et améliorer le produit en prioritisant les fonctionnalités les plus utilisées.
+
+**User Story** : En tant que porteur du projet, je veux savoir combien d'utilisateurs sélectionnent une adresse dans l'autocomplete et cliquent sur des zones, afin de prioriser les améliorations produit sur les fonctionnalités réellement utilisées.
+
+**FRs couverts** : FR40, FR41, FR42
+
+**Outcome clé** :
+
+- Script Umami intégré dans le layout global Next.js (`app/layout.tsx`)
+- Tracking anonyme activé dès le chargement de la page (aucun cookie, aucune donnée personnelle)
+- 2 événements customs instrumentés : `select_address`, `click_zone`
+- Variable d'environnement `NEXT_PUBLIC_UMAMI_WEBSITE_ID` documentée dans `.env.example`
+- RGPD-conforme : pas de cookies tiers, hébergement UE, pas de données personnelles
+- Tracking désactivé en environnement de développement (évite pollution des stats)
+
+**Notes techniques** :
+
+- Script Umami ajouté via `next/script` (strategy `afterInteractive`) dans `app/layout.tsx`
+- Type declaration `window.umami` dans `types/umami.d.ts` pour TypeScript strict
+- Umami self-hosted (Docker) ou Umami Cloud selon infrastructure déployée
+- `NEXT_PUBLIC_UMAMI_SCRIPT_URL` configurable pour pointer vers instance self-hosted
+
 ---
 
-**Total : 7 Epics (Epic 0 → Epic 6)**
+**Total : 8 Epics (Epic 0 → Epic 7)**
 
-**Couverture FRs : 39/39** ✅
+**Couverture FRs : 42/42** ✅
 
 **Accessibilité : Intégrée dans chaque epic via Acceptance Criteria des stories**
 
@@ -2978,6 +3011,166 @@ export default async function DepartementPage({params}) {
 
 ---
 
+## Epic 7: Analytics & Tracking Umami
+
+### Story 7.1: Intégration du script Umami dans Next.js
+
+**User Story**
+En tant que **développeur**, je veux ajouter le script de tracking Umami dans le layout global Next.js, afin que toutes les pages soient trackées automatiquement sans cookies et en conformité RGPD.
+
+**Acceptance Criteria**
+
+**GIVEN** : Le projet Next.js est fonctionnel
+**WHEN** : Le développeur configure les variables d'environnement Umami et démarre l'application
+**THEN** :
+
+- Le composant `Script` de `next/script` est ajouté dans `app/layout.tsx` avec `strategy="afterInteractive"`
+- Le script charge le tracker Umami depuis l'URL configurée via `NEXT_PUBLIC_UMAMI_SCRIPT_URL`
+- L'attribut `data-website-id` utilise la valeur de `NEXT_PUBLIC_UMAMI_WEBSITE_ID`
+- En l'absence de `NEXT_PUBLIC_UMAMI_WEBSITE_ID`, le script n'est pas rendu (tracking silencieusement désactivé)
+
+```tsx
+// app/layout.tsx
+import Script from 'next/script';
+
+export default function RootLayout({children}: {children: React.ReactNode}) {
+    return (
+        <html lang="fr">
+            <body>
+                {children}
+                {process.env.NEXT_PUBLIC_UMAMI_WEBSITE_ID && (
+                    <Script
+                        src={process.env.NEXT_PUBLIC_UMAMI_SCRIPT_URL ?? 'https://cloud.umami.is/script.js'}
+                        data-website-id={process.env.NEXT_PUBLIC_UMAMI_WEBSITE_ID}
+                        strategy="afterInteractive"
+                    />
+                )}
+            </body>
+        </html>
+    );
+}
+```
+
+**AND** : Un fichier `types/umami.d.ts` déclare le type global `window.umami` :
+
+```typescript
+// types/umami.d.ts
+declare global {
+    interface Window {
+        umami?: {
+            track: (eventName: string, data?: Record<string, unknown>) => void;
+        };
+    }
+}
+
+export {};
+```
+
+**AND** : Le fichier `.env.example` documente les deux variables :
+
+```bash
+# Umami Analytics (optional - tracking disabled if not set)
+NEXT_PUBLIC_UMAMI_WEBSITE_ID=
+NEXT_PUBLIC_UMAMI_SCRIPT_URL=https://cloud.umami.is/script.js
+```
+
+**AND** : Le README.md mentionne la configuration optionnelle Umami (section Analytics)
+
+**Accessibility Integration**
+
+N/A (script de tracking invisible, aucun impact sur l'interface utilisateur)
+
+**Performance & Technical Acceptance**
+
+- `strategy="afterInteractive"` garantit que le script ne bloque pas le rendu initial (LCP non impacté)
+- Le script ne charge aucun cookie (vérifié via DevTools → Application → Cookies)
+- Bundle JavaScript initial non impacté (script chargé de manière asynchrone post-hydratation)
+- En local sans `NEXT_PUBLIC_UMAMI_WEBSITE_ID` défini : aucun appel réseau vers Umami
+
+---
+
+### Story 7.2: Événements customs analytics (search_address, select_address, click_zone)
+
+**User Story**
+En tant que **porteur du projet**, je veux que les trois interactions clés — recherche d'adresse, sélection d'une adresse et clic sur une zone — déclenchent des événements analytics custom dans Umami, afin de mesurer l'usage des fonctionnalités principales.
+
+**Acceptance Criteria**
+
+**GIVEN** : Le script Umami est intégré (Story 7.1) et `NEXT_PUBLIC_UMAMI_WEBSITE_ID` est renseigné
+**WHEN** : L'utilisateur effectue une recherche, sélectionne une adresse ou clique sur une zone
+**THEN** :
+
+**Événement `search_address`** — déclenché dans le composant `SearchBar` lors de la soumission d'une query (après debounce de 300ms, au moment de l'appel à l'API Adresse) :
+
+```typescript
+// components/SearchBar.tsx
+const handleSearch = (query: string) => {
+    window.umami?.track('search_address', {query});
+    // ... logic appel API Adresse
+};
+```
+
+**Événement `select_address`** — déclenché dans `SearchBar` lors du clic sur une suggestion de l'autocomplete :
+
+```typescript
+// components/SearchBar.tsx
+const handleSelectSuggestion = (suggestion: AddressSuggestion) => {
+    window.umami?.track('select_address', {
+        label: suggestion.label,
+        type: suggestion.type, // 'municipality' | 'postcode' | 'street'
+    });
+    // ... logic zoom carte
+};
+```
+
+**Événement `click_zone`** — déclenché dans le composant `Map` lors du clic sur un polygone de la carte :
+
+```typescript
+// components/Map.tsx
+map.on('click', 'zones-fill', (event) => {
+    const zone = event.features?.[0]?.properties;
+    if (zone) {
+        window.umami?.track('click_zone', {
+            zone_name: zone.nom,
+            zone_type: zone.type_protection,
+        });
+        // ... affichage détails zone
+    }
+});
+```
+
+**AND** : Les trois événements apparaissent dans le tableau de bord Umami sous "Custom events" avec leurs propriétés respectives
+
+**AND** : Les événements utilisent l'opérateur optional chaining (`?.`) pour être silencieux si `window.umami` n'est pas encore chargé ou non configuré
+
+**AND** : Aucune donnée personnelle identifiable n'est transmise (pas d'IP, pas d'email, pas d'identifiant utilisateur) — uniquement des données comportementales agrégées
+
+**Accessibility Integration**
+
+N/A (tracking invisible, aucune interaction UI ajoutée)
+
+**Performance & Technical Acceptance**
+
+- Appels `window.umami?.track()` synchrones et non bloquants (< 1ms d'impact)
+- Aucun appel réseau supplémentaire visible dans le critical path des interactions (fire-and-forget)
+- Tests unitaires vérifient que `window.umami.track` est appelé avec les bons arguments :
+
+```typescript
+// components/__tests__/SearchBar.test.tsx
+it('tracks search_address event on search submission', () => {
+    const mockTrack = jest.fn();
+    Object.defineProperty(window, 'umami', {
+        value: {track: mockTrack},
+        writable: true,
+    });
+
+    // ... simulate search
+    expect(mockTrack).toHaveBeenCalledWith('search_address', {query: 'Strasbourg'});
+});
+```
+
+---
+
 ---
 
 ## Step 3 Completion Summary
@@ -3010,11 +3203,15 @@ export default async function DepartementPage({params}) {
 
 - Routes départements/régions SSG, métadonnées dynamiques OpenGraph, sitemap XML, deep linking
 
+✅ **Epic 7: Analytics & Tracking Umami** — 2 stories
+
+- Intégration script Umami via next/script, 3 événements customs (search_address, select_address, click_zone)
+
 ---
 
-**Total Stories : 27 stories**
+**Total Stories : 29 stories**
 
-**Functional Requirements Coverage : 39/39** ✅
+**Functional Requirements Coverage : 42/42** ✅
 
 **Non-Functional Requirements Integration :**
 
