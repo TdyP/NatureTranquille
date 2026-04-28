@@ -84,6 +84,8 @@ async function generateTile(z: number, x: number, y: number): Promise<Buffer | n
     const startTime = performance.now();
 
     // SQL query to generate MVT tile
+    // Tolerances are kept conservative to avoid collapsing small zones into invalid geometries.
+    // clip_geom=false avoids straight-line artefacts at tile boundaries (MapLibre clips client-side).
     const query = `
         WITH mvtgeom AS (
             SELECT
@@ -97,22 +99,23 @@ async function generateTile(z: number, x: number, y: number): Promise<Buffer | n
                 ST_AsMVTGeom(
                     ST_Transform(
                         CASE
-                            WHEN $1 BETWEEN 0 AND 6 THEN ST_SimplifyPreserveTopology(geometry, 0.01)
-                            WHEN $1 BETWEEN 7 AND 10 THEN ST_SimplifyPreserveTopology(geometry, 0.001)
-                            WHEN $1 BETWEEN 11 AND 14 THEN ST_SimplifyPreserveTopology(geometry, 0.0001)
+                            WHEN $1 BETWEEN 0 AND 8  THEN ST_SimplifyPreserveTopology(geometry, 0.001)
+                            WHEN $1 BETWEEN 9 AND 12 THEN ST_SimplifyPreserveTopology(geometry, 0.0001)
                             ELSE geometry
                         END,
                         3857
                     ),
                     ST_TileEnvelope($1, $2, $3),
                     4096,
-                    512,
-                    true
+                    64,
+                    false
                 ) AS geom
             FROM zones
             WHERE geometry && ST_Transform(ST_TileEnvelope($1, $2, $3), 4326)
         )
-        SELECT ST_AsMVT(mvtgeom.*, 'zones', 4096, 'geom', 'id') as tile FROM mvtgeom;
+        SELECT ST_AsMVT(mvtgeom.*, 'zones', 4096, 'geom', 'id') as tile
+        FROM mvtgeom
+        WHERE geom IS NOT NULL;
     `;
 
     try {
