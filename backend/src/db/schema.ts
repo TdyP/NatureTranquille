@@ -1,4 +1,4 @@
-import {customType, index, integer, pgTable, text, timestamp} from 'drizzle-orm/pg-core';
+import {customType, index, integer, pgTable, text, timestamp, varchar} from 'drizzle-orm/pg-core';
 
 const multipolygonGeometry = customType<{data: string; driverData: string}>({
     dataType() {
@@ -21,10 +21,13 @@ export const zones = pgTable(
         gestionnaire: text('gestionnaire'),
         source: text('source'),
         dateMaj: timestamp('date_maj', {withTimezone: true}),
+        codeDepartement: varchar('code_departement', {length: 3}),
+        nomDepartement: text('nom_departement'),
         geometry: multipolygonGeometry('geometry').notNull(),
     },
     (table) => [
         index('zones_geometry_gist_idx').using('gist', table.geometry),
         index('zones_type_protection_idx').on(table.typeProtection),
+        index('idx_zones_code_departement').on(table.codeDepartement),
     ],
 );

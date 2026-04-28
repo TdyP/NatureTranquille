@@ -28,6 +28,14 @@ export interface MapProps {
      */
     tilesUrl?: string;
     /**
+     * Initial bounds to fit the map to [[minLng, minLat], [maxLng, maxLat]]
+     */
+    initialBounds?: [[number, number], [number, number]];
+    /**
+     * Highlight and filter zones by department code
+     */
+    highlightDepartement?: string;
+    /**
      * Callback when map is ready
      */
     onMapReady?: (handle: MapHandle) => void;
@@ -55,6 +63,8 @@ const Map = forwardRef<MapHandle, MapProps>(function Map(
         zoom = 6,
         styleUrl = process.env.NEXT_PUBLIC_MAPLIBRE_STYLE || 'https://tiles.openfreemap.org/styles/liberty',
         tilesUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000',
+        initialBounds,
+        highlightDepartement,
         onMapReady,
     },
     ref,
@@ -195,6 +205,25 @@ const Map = forwardRef<MapHandle, MapProps>(function Map(
                     'text-halo-width': 2,
                 },
             });
+
+            // Fit to department bounds if provided (no animation for SSG pages)
+            if (initialBounds) {
+                map.current.fitBounds(initialBounds, {padding: 50, duration: 0});
+            }
+
+            // Filter zones by department if provided
+            if (highlightDepartement) {
+                map.current.setFilter('zones-fill', [
+                    '==',
+                    ['get', 'codeDepartement'],
+                    highlightDepartement,
+                ]);
+                map.current.setFilter('zones-stroke', [
+                    '==',
+                    ['get', 'codeDepartement'],
+                    highlightDepartement,
+                ]);
+            }
 
             // Change cursor on hover
             map.current.on('mouseenter', 'zones-fill', () => {

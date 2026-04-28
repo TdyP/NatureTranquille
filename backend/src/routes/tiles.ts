@@ -93,6 +93,7 @@ async function generateTile(z: number, x: number, y: number): Promise<Buffer | n
                 gestionnaire,
                 source,
                 date_maj AS "dateMaj",
+                code_departement AS "codeDepartement",
                 ST_AsMVTGeom(
                     ST_Transform(
                         CASE
