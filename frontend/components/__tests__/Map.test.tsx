@@ -129,4 +129,79 @@ describe('Map Component', () => {
 
         expect(mockRemove).toHaveBeenCalled();
     });
+
+    it('calls fitBounds with initialBounds when provided', async () => {
+        const mockFitBounds = jest.fn();
+        const maplibregl = require('maplibre-gl');
+        maplibregl.Map.mockImplementation(() => ({
+            on: jest.fn((event: string, callback: () => void) => {
+                if (event === 'load') setTimeout(callback, 0);
+            }),
+            addControl: jest.fn(),
+            addSource: jest.fn(),
+            addLayer: jest.fn(),
+            setFilter: jest.fn(),
+            fitBounds: mockFitBounds,
+            remove: jest.fn(),
+        }));
+
+        const bounds: [[number, number], [number, number]] = [[6.8, 47.4], [7.9, 48.9]];
+        render(<Map initialBounds={bounds} />);
+
+        await waitFor(() => {
+            expect(mockFitBounds).toHaveBeenCalledWith(bounds, expect.objectContaining({padding: 50, duration: 0}));
+        });
+    });
+
+    it('calls setFilter with highlightDepartement when provided', async () => {
+        const mockSetFilter = jest.fn();
+        const maplibregl = require('maplibre-gl');
+        maplibregl.Map.mockImplementation(() => ({
+            on: jest.fn((event: string, callback: () => void) => {
+                if (event === 'load') setTimeout(callback, 0);
+            }),
+            addControl: jest.fn(),
+            addSource: jest.fn(),
+            addLayer: jest.fn(),
+            setFilter: mockSetFilter,
+            remove: jest.fn(),
+        }));
+
+        render(<Map highlightDepartement="68" />);
+
+        await waitFor(() => {
+            expect(mockSetFilter).toHaveBeenCalledWith(
+                'zones-fill',
+                ['==', ['get', 'codeDepartement'], '68'],
+            );
+            expect(mockSetFilter).toHaveBeenCalledWith(
+                'zones-stroke',
+                ['==', ['get', 'codeDepartement'], '68'],
+            );
+        });
+    });
+
+    it('does not call fitBounds when initialBounds is not provided', async () => {
+        const mockFitBounds = jest.fn();
+        const maplibregl = require('maplibre-gl');
+        maplibregl.Map.mockImplementation(() => ({
+            on: jest.fn((event: string, callback: () => void) => {
+                if (event === 'load') setTimeout(callback, 0);
+            }),
+            addControl: jest.fn(),
+            addSource: jest.fn(),
+            addLayer: jest.fn(),
+            setFilter: jest.fn(),
+            fitBounds: mockFitBounds,
+            remove: jest.fn(),
+        }));
+
+        render(<Map />);
+
+        await waitFor(() => {
+            expect(screen.queryByRole('status')).not.toBeInTheDocument();
+        });
+
+        expect(mockFitBounds).not.toHaveBeenCalled();
+    });
 });
