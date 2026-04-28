@@ -42,6 +42,7 @@ services:
       NODE_ENV: development
       NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://localhost:4000}
       NEXT_PUBLIC_MAPLIBRE_STYLE: ${NEXT_PUBLIC_MAPLIBRE_STYLE:-https://demotiles.maplibre.org/style.json}
+      DATABASE_URL: postgresql://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-changeme}@db:5432/${POSTGRES_DB:-naturetranquille}
       WATCHPACK_POLLING: true
     ports:
       - "3000:3000"

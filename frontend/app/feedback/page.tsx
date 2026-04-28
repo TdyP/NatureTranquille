@@ -47,7 +47,7 @@ export default function FeedbackPage() {
     };
 
     return (
-        <main className="container mx-auto px-4 py-8 max-w-2xl" id="main-content">
+        <main className="container mx-auto h-full overflow-y-auto px-4 py-8 max-w-2xl" id="main-content">
             <h1 className="text-3xl font-bold mb-2">Signaler une erreur ou suggérer une amélioration</h1>
             <p className="text-muted-foreground mb-8">
                 Aidez-nous à améliorer la qualité des données en signalant toute erreur ou en proposant vos idées.

@@ -10,7 +10,7 @@ export const metadata: Metadata = {
 
 export default function AProposPage() {
     return (
-        <main className="container mx-auto px-4 py-8 max-w-3xl">
+        <main className="container mx-auto h-full overflow-y-auto px-4 py-8 max-w-3xl">
             <h1 className="text-3xl font-bold mb-6">À propos de NatureTranquille</h1>
 
             <section className="mb-8">

@@ -2,7 +2,7 @@ import {notFound} from 'next/navigation';
 import dynamic from 'next/dynamic';
 import Link from 'next/link';
 import type {Metadata} from 'next';
-import {getDepartementsWithZones, getDepartementBySlug, getDepartementBounds, getZonesByDepartement} from '@/lib/db/departements';
+import {getDepartementsWithZones, getDepartementBySlug, getDepartementBounds} from '@/lib/db/departements';
 
 const Map = dynamic(() => import('@/components/Map'), {
     ssr: false,
@@ -48,64 +48,43 @@ export default async function DepartementPage({params}: Props) {
 
     if (!dept) notFound();
 
-    const zones = await getZonesByDepartement(dept.code);
-
     return (
-        <div className="mx-auto max-w-6xl px-4 py-8">
-            <nav aria-label="Breadcrumb" className="mb-6">
-                <ol className="flex items-center gap-2 text-sm text-muted-foreground">
-                    <li>
-                        <Link href="/" className="hover:text-foreground">
-                            Accueil
-                        </Link>
-                    </li>
-                    <li aria-hidden="true">/</li>
-                    <li>
-                        <Link href="/departements" className="hover:text-foreground">
-                            Départements
-                        </Link>
-                    </li>
-                    <li aria-hidden="true">/</li>
-                    <li aria-current="page" className="text-foreground">
-                        {dept.nom}
-                    </li>
-                </ol>
-            </nav>
-
-            <h1 className="mb-4 text-3xl font-bold">
-                Zones sans chasse dans le {dept.nom} ({dept.code})
-            </h1>
-
-            <p className="mb-6 text-muted-foreground">
-                {zones.length} zone(s) sans chasse identifiée(s) dans le département {dept.nom}.
-            </p>
+        <div className="flex h-full flex-col">
+            <div className="shrink-0 border-b bg-background px-4 py-3">
+                <nav aria-label="Breadcrumb" className="mb-1">
+                    <ol className="flex items-center gap-2 text-sm text-muted-foreground">
+                        <li>
+                            <Link href="/" className="hover:text-foreground">
+                                Accueil
+                            </Link>
+                        </li>
+                        <li aria-hidden="true">/</li>
+                        <li>
+                            <Link href="/departements" className="hover:text-foreground">
+                                Départements
+                            </Link>
+                        </li>
+                        <li aria-hidden="true">/</li>
+                        <li aria-current="page" className="text-foreground">
+                            {dept.nom}
+                        </li>
+                    </ol>
+                </nav>
+                <h1 className="text-xl font-bold">
+                    Réserves de chasse — {dept.nom} ({dept.code})
+                </h1>
+            </div>
 
             <div
-                className="mb-8 h-[450px] overflow-hidden rounded-lg border"
+                className="flex-1 overflow-hidden"
                 role="region"
-                aria-label={`Carte des zones sans chasse dans le ${dept.nom}`}
+                aria-label={`Carte des réserves de chasse dans le ${dept.nom}`}
             >
                 <Map
                     initialBounds={bounds ?? undefined}
                     highlightDepartement={dept.code}
                 />
             </div>
-
-            <section className="mt-8">
-                <h2 className="mb-3 text-2xl font-semibold">Zones identifiées</h2>
-                <ul className="space-y-2">
-                    {zones.map((zone) => (
-                        <li key={zone.id} className="rounded-md border p-3">
-                            <strong>{zone.nom ?? 'Zone sans nom'}</strong>
-                            {zone.typeProtection && (
-                                <span className="ml-2 text-sm text-muted-foreground">
-                                    — {zone.typeProtection}
-                                </span>
-                            )}
-                        </li>
-                    ))}
-                </ul>
-            </section>
         </div>
     );
 }

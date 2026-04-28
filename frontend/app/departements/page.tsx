@@ -3,7 +3,7 @@ import {getDepartementsWithZones} from '@/lib/db/departements';
 
 export const metadata = {
     title: 'Départements - NatureTranquille',
-    description: 'Liste des départements avec des zones sans chasse référencées sur NatureTranquille.',
+    description: 'Liste des départements avec des réserves de chasse référencées sur NatureTranquille.',
 };
 
 export default async function DepartementsPage() {
@@ -25,10 +25,10 @@ export default async function DepartementsPage() {
                 </ol>
             </nav>
 
-            <h1 className="mb-6 text-3xl font-bold">Départements</h1>
+            <h1 className="mb-6 text-3xl font-bold">Réserves de chasse par département</h1>
 
             <p className="mb-8 text-muted-foreground">
-                {departements.length} département(s) avec des zones sans chasse référencées.
+                {departements.length} département(s) avec des réserves de chasse référencées.
             </p>
 
             <ul className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">

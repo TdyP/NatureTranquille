@@ -49,7 +49,7 @@ export default function Home() {
     }, []);
 
     return (
-        <main className="relative h-full">
+        <div className="relative h-full overflow-hidden">
             <DisclaimerModal />
 
             {/* Search bar overlay */}
@@ -58,6 +58,6 @@ export default function Home() {
             </div>
 
             <Map onMapReady={handleMapReady} />
-        </main>
+        </div>
     );
 }
