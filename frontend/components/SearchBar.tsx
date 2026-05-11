@@ -20,6 +20,7 @@ export interface AddressSearchResult {
         postcode?: string; // "67000"
         city?: string;
         context?: string; // "67, Bas-Rhin, Grand Est"
+        type?: string; // "municipality" | "postcode" | "street" | "housenumber"
         id: string;
     };
     bbox?: [number, number, number, number]; // [minLng, minLat, maxLng, maxLat]
@@ -218,6 +219,10 @@ export default function SearchBar({
      */
     const handleSelect = useCallback(
         (result: AddressSearchResult) => {
+            window.umami?.track('select_address', {
+                label: result.properties.label,
+                type: result.properties.type,
+            });
             setQuery('');
             setSuggestions([]);
             setIsOpen(false);

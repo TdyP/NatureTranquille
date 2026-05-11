@@ -204,4 +204,98 @@ describe('Map Component', () => {
 
         expect(mockFitBounds).not.toHaveBeenCalled();
     });
+
+    it('tracks click_zone event when a zone is clicked', async () => {
+        const mockTrack = jest.fn();
+        Object.defineProperty(window, 'umami', {value: {track: mockTrack}, writable: true});
+
+        const layerHandlers: Record<string, (e: any) => void> = {};
+        const maplibregl = require('maplibre-gl');
+        maplibregl.Map.mockImplementation(() => ({
+            on: jest.fn((event: string, layerOrCallback: string | (() => void), callback?: (e: any) => void) => {
+                if (event === 'load' && typeof layerOrCallback === 'function') {
+                    setTimeout(layerOrCallback, 0);
+                } else if (typeof callback === 'function') {
+                    layerHandlers[`${event}:${layerOrCallback}`] = callback;
+                }
+            }),
+            addControl: jest.fn(),
+            addSource: jest.fn(),
+            addLayer: jest.fn(),
+            setFeatureState: jest.fn(),
+            getCanvas: jest.fn(() => ({style: {}})),
+            remove: jest.fn(),
+        }));
+
+        render(<Map />);
+
+        await waitFor(() => {
+            expect(layerHandlers['click:zones-fill']).toBeDefined();
+        });
+
+        layerHandlers['click:zones-fill']({
+            features: [
+                {
+                    id: 42,
+                    properties: {
+                        nom: 'Forêt domaniale de test',
+                        typeProtection: 'Réserve naturelle régionale',
+                        gestionnaire: null,
+                        source: 'ONF',
+                        dateMaj: '2024-01-01',
+                    },
+                },
+            ],
+        });
+
+        expect(mockTrack).toHaveBeenCalledWith('click_zone', {
+            zone_name: 'Forêt domaniale de test',
+            zone_type: 'Réserve naturelle régionale',
+        });
+    });
+
+    it('does not throw when window.umami is undefined and zone is clicked', async () => {
+        Object.defineProperty(window, 'umami', {value: undefined, writable: true});
+
+        const layerHandlers: Record<string, (e: any) => void> = {};
+        const maplibregl = require('maplibre-gl');
+        maplibregl.Map.mockImplementation(() => ({
+            on: jest.fn((event: string, layerOrCallback: string | (() => void), callback?: (e: any) => void) => {
+                if (event === 'load' && typeof layerOrCallback === 'function') {
+                    setTimeout(layerOrCallback, 0);
+                } else if (typeof callback === 'function') {
+                    layerHandlers[`${event}:${layerOrCallback}`] = callback;
+                }
+            }),
+            addControl: jest.fn(),
+            addSource: jest.fn(),
+            addLayer: jest.fn(),
+            setFeatureState: jest.fn(),
+            getCanvas: jest.fn(() => ({style: {}})),
+            remove: jest.fn(),
+        }));
+
+        render(<Map />);
+
+        await waitFor(() => {
+            expect(layerHandlers['click:zones-fill']).toBeDefined();
+        });
+
+        expect(() =>
+            layerHandlers['click:zones-fill']({
+                features: [
+                    {
+                        id: 1,
+                        properties: {
+                            nom: 'Zone test',
+                            typeProtection: 'Réserve',
+                            gestionnaire: null,
+                            source: 'test',
+                            dateMaj: '2024-01-01',
+                        },
+                    },
+                ],
+            }),
+        ).not.toThrow();
+    });
 });

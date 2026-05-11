@@ -274,6 +274,11 @@ const Map = forwardRef<MapHandle, MapProps>(function Map(
                 const clickedId = clickedFeature.id as number;
                 const properties = clickedFeature.properties as ZoneProperties;
 
+                window.umami?.track('click_zone', {
+                    zone_name: properties.nom,
+                    zone_type: properties.typeProtection,
+                });
+
                 // Set new selection
                 if (selectedZoneIdRef.current !== clickedId) {
                     map.current.setFeatureState(

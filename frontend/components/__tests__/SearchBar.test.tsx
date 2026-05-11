@@ -42,7 +42,7 @@ const mockSearchResponse = {
 
 describe('SearchBar', () => {
     beforeEach(() => {
-        jest.clearAllMocks();
+        jest.resetAllMocks();
         sessionStorage.clear();
     });
 
@@ -297,5 +297,65 @@ describe('SearchBar', () => {
         await user.keyboard('{Enter}');
 
         expect(handleSelect).toHaveBeenCalled();
+    });
+
+    it('tracks select_address event when suggestion is selected', async () => {
+        const mockTrack = jest.fn();
+        Object.defineProperty(window, 'umami', {value: {track: mockTrack}, writable: true, configurable: true});
+
+        const user = userEvent.setup();
+        const mockResultWithType = {
+            type: 'Feature' as const,
+            geometry: {type: 'Point' as const, coordinates: [7.7521, 48.5734] as [number, number]},
+            properties: {
+                label: 'Strasbourg (67000)',
+                name: 'Strasbourg',
+                postcode: '67000',
+                context: '67, Bas-Rhin, Grand Est',
+                type: 'municipality',
+                id: 'strasbourg-typed',
+            },
+        };
+        (fetch as jest.Mock).mockResolvedValueOnce({
+            ok: true,
+            json: async () => ({features: [mockResultWithType]}),
+        });
+
+        render(<SearchBar />);
+
+        const input = screen.getByRole('combobox');
+        await user.type(input, 'Stras');
+
+        await waitFor(() => {
+            expect(screen.getByText('Strasbourg')).toBeInTheDocument();
+        });
+
+        await user.click(screen.getByText('Strasbourg'));
+
+        expect(mockTrack).toHaveBeenCalledWith('select_address', {
+            label: 'Strasbourg (67000)',
+            type: 'municipality',
+        });
+    });
+
+    it('does not throw when window.umami is undefined and suggestion is selected', async () => {
+        Object.defineProperty(window, 'umami', {value: undefined, writable: true, configurable: true});
+
+        const user = userEvent.setup();
+        (fetch as jest.Mock).mockResolvedValueOnce({
+            ok: true,
+            json: async () => mockSearchResponse,
+        });
+
+        render(<SearchBar />);
+
+        const input = screen.getByRole('combobox');
+        await user.type(input, 'Stras');
+
+        await waitFor(() => {
+            expect(screen.getByText('Strasbourg')).toBeInTheDocument();
+        });
+
+        await expect(user.click(screen.getByText('Strasbourg'))).resolves.not.toThrow();
     });
 });
