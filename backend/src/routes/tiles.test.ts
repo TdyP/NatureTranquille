@@ -5,6 +5,8 @@ import request from 'supertest';
 import tilesRouter from './tiles';
 import {pool} from '../db/client';
 
+const dbAvailable = !!process.env.DATABASE_URL;
+
 describe('Tiles endpoint - Parameter validation', () => {
     const app = express();
     app.use('/', tilesRouter);
@@ -59,7 +61,7 @@ describe('Tiles endpoint - Parameter validation', () => {
     });
 });
 
-describe('Tiles endpoint - Response headers', () => {
+describe('Tiles endpoint - Response headers', {skip: !dbAvailable && 'DATABASE_URL not set'}, () => {
     const app = express();
     app.use('/', tilesRouter);
 
@@ -88,7 +90,7 @@ describe('Tiles endpoint - Response headers', () => {
     });
 });
 
-describe('Tiles endpoint - Empty tiles', () => {
+describe('Tiles endpoint - Empty tiles', {skip: !dbAvailable && 'DATABASE_URL not set'}, () => {
     const app = express();
     app.use('/', tilesRouter);
 
@@ -99,7 +101,7 @@ describe('Tiles endpoint - Empty tiles', () => {
     });
 });
 
-describe('Tiles endpoint - Tile cache', () => {
+describe('Tiles endpoint - Tile cache', {skip: !dbAvailable && 'DATABASE_URL not set'}, () => {
     const app = express();
     app.use('/', tilesRouter);
     it('should serve from cache on second request', async () => {

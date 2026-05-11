@@ -29,9 +29,9 @@ describe('zones table schema', () => {
     it('id column is a primary key generated always as identity', () => {
         const columns = getTableColumns(zones);
         assert.equal(columns.id.primary, true);
-        const idCol = columns.id as unknown as {identity?: {type: string}};
-        assert.ok(idCol.identity, 'id should have identity config');
-        assert.equal(idCol.identity?.type, 'always');
+        const idCol = columns.id as unknown as {generatedIdentity?: {type: string}};
+        assert.ok(idCol.generatedIdentity, 'id should have identity config');
+        assert.equal(idCol.generatedIdentity?.type, 'always');
     });
 
     it('geometry column is not nullable', () => {
