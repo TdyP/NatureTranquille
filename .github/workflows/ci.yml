@@ -7,30 +7,140 @@ on:
         branches: [main]
 
 jobs:
-    backend:
+    backend-deps:
         runs-on: ubuntu-latest
-
-        defaults:
-            run:
-                working-directory: backend
-
         steps:
             - uses: actions/checkout@v4
-
             - uses: actions/setup-node@v4
               with:
                   node-version: 24
                   cache: npm
                   cache-dependency-path: backend/package-lock.json
-
             - name: Install dependencies
               run: npm ci
+              working-directory: backend
+            - name: Cache node_modules
+              uses: actions/cache/save@v4
+              with:
+                  path: backend/node_modules
+                  key: backend-deps-${{ runner.os }}-${{ hashFiles('backend/package-lock.json') }}
 
+    backend-lint:
+        needs: backend-deps
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/checkout@v4
+            - uses: actions/setup-node@v4
+              with:
+                  node-version: 24
+            - name: Restore dependencies
+              uses: actions/cache/restore@v4
+              with:
+                  path: backend/node_modules
+                  key: backend-deps-${{ runner.os }}-${{ hashFiles('backend/package-lock.json') }}
             - name: Lint
               run: npm run lint
+              working-directory: backend
 
+    backend-typecheck:
+        needs: backend-deps
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/checkout@v4
+            - uses: actions/setup-node@v4
+              with:
+                  node-version: 24
+            - name: Restore dependencies
+              uses: actions/cache/restore@v4
+              with:
+                  path: backend/node_modules
+                  key: backend-deps-${{ runner.os }}-${{ hashFiles('backend/package-lock.json') }}
             - name: Type check
               run: npm run typecheck
+              working-directory: backend
 
+    backend-tests:
+        needs: [backend-lint, backend-typecheck]
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/checkout@v4
+            - uses: actions/setup-node@v4
+              with:
+                  node-version: 24
+            - name: Restore dependencies
+              uses: actions/cache/restore@v4
+              with:
+                  path: backend/node_modules
+                  key: backend-deps-${{ runner.os }}-${{ hashFiles('backend/package-lock.json') }}
             - name: Run tests
               run: npm test
+              working-directory: backend
+
+    frontend-deps:
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/checkout@v4
+            - uses: actions/setup-node@v4
+              with:
+                  node-version: 24
+                  cache: npm
+                  cache-dependency-path: frontend/package-lock.json
+            - name: Install dependencies
+              run: npm ci
+              working-directory: frontend
+            - name: Cache node_modules
+              uses: actions/cache/save@v4
+              with:
+                  path: frontend/node_modules
+                  key: frontend-deps-${{ runner.os }}-${{ hashFiles('frontend/package-lock.json') }}
+
+    frontend-lint:
+        needs: frontend-deps
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/checkout@v4
+            - uses: actions/setup-node@v4
+              with:
+                  node-version: 24
+            - name: Restore dependencies
+              uses: actions/cache/restore@v4
+              with:
+                  path: frontend/node_modules
+                  key: frontend-deps-${{ runner.os }}-${{ hashFiles('frontend/package-lock.json') }}
+            - name: Lint
+              run: npm run lint
+              working-directory: frontend
+
+    frontend-typecheck:
+        needs: frontend-deps
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/checkout@v4
+            - uses: actions/setup-node@v4
+              with:
+                  node-version: 24
+            - name: Restore dependencies
+              uses: actions/cache/restore@v4
+              with:
+                  path: frontend/node_modules
+                  key: frontend-deps-${{ runner.os }}-${{ hashFiles('frontend/package-lock.json') }}
+            - name: Type check
+              run: npm run typecheck
+              working-directory: frontend
+
+    frontend-tests:
+        needs: [frontend-lint, frontend-typecheck]
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/checkout@v4
+            - uses: actions/setup-node@v4
+              with:
+                  node-version: 24
+            - name: Restore dependencies
+              uses: actions/cache/restore@v4
+              with:
+                  path: frontend/node_modules
+                  key: frontend-deps-${{ runner.os }}-${{ hashFiles('frontend/package-lock.json') }}
+            - name: Run tests
+              run: npm test
+              working-directory: frontend
