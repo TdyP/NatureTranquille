@@ -128,6 +128,19 @@ NEXT_PUBLIC_MAPLIBRE_STYLE=https://demotiles.maplibre.org/style.json  # Style de
 
 Pour la liste complète et les variables optionnelles (SMTP, production), consulter [.env.example](.env.example).
 
+### Analytics (optionnel)
+
+NatureTranquille supporte [Umami](https://umami.is/) comme solution d'analytics sans cookies, conforme RGPD.
+
+Pour activer le tracking, renseigner les variables dans `.env` :
+
+```env
+NEXT_PUBLIC_UMAMI_WEBSITE_ID=<votre-website-id>
+NEXT_PUBLIC_UMAMI_SCRIPT_URL=https://cloud.umami.is/script.js  # ou votre instance self-hosted
+```
+
+Si `NEXT_PUBLIC_UMAMI_WEBSITE_ID` n'est pas défini, aucun script de tracking n'est chargé.
+
 ### Import de données
 
 Les données géospatiales (Shapefiles, GeoJSON) doivent être placées dans le dossier `data/raw/` avant d'être importées dans PostgreSQL.
