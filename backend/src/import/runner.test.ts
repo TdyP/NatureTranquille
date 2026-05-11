@@ -30,7 +30,7 @@ describe('runImport', () => {
 
     it('records error when geoJsonReader throws (file not found)', async () => {
         const pool = makePool();
-        const failingReader = mock.fn((_file: string): GeoJsonCollection => {
+        const failingReader = mock.fn((): GeoJsonCollection => {
             throw new Error('File not found');
         });
         const result = await runImport(pool, [{file: '/missing.shp', sourceValue: 'SRC'}], failingReader);
@@ -42,7 +42,7 @@ describe('runImport', () => {
     it('inserts features and returns correct counts', async () => {
         const pool = makePool(true);
         const collection = makeCollection(2);
-        const reader = mock.fn((_file: string) => collection);
+        const reader = mock.fn(() => collection);
         const result = await runImport(
             pool,
             [{file: '/data/test.shp', sourceValue: 'TEST', nomColumn: 'NOM', typeProtectionValue: 'reserve'}],
@@ -66,7 +66,7 @@ describe('runImport', () => {
                 },
             ],
         };
-        const reader = mock.fn((_file: string) => collection);
+        const reader = mock.fn(() => collection);
         const result = await runImport(pool, [{file: '/data/test.shp', sourceValue: 'TEST'}], reader);
         assert.equal(result.sources[0].corrected, 1);
         assert.equal(result.sources[0].inserted, 1);
@@ -91,7 +91,7 @@ describe('runImport', () => {
                 },
             ],
         };
-        const reader = mock.fn((_file: string) => collection);
+        const reader = mock.fn(() => collection);
         const result = await runImport(pool, [{file: '/data/test.shp', sourceValue: 'TEST'}], reader);
         assert.equal(result.sources[0].skipped, 1);
         assert.equal(result.sources[0].inserted, 0);
@@ -118,7 +118,7 @@ describe('runImport', () => {
                 },
             ],
         };
-        const reader = mock.fn((_file: string) => collection);
+        const reader = mock.fn(() => collection);
         await runImport(pool, [{file: '/data/test.shp', sourceValue: 'TEST', nomColumn: 'NAME'}], reader);
         assert.equal(insertedNom, 'Réserve Test');
     });
@@ -144,7 +144,7 @@ describe('runImport', () => {
                 },
             ],
         };
-        const reader = mock.fn((_file: string) => collection);
+        const reader = mock.fn(() => collection);
         await runImport(pool, [{file: '/data/test.shp', sourceValue: 'TEST', nomValue: 'Zone fixe'}], reader);
         assert.equal(insertedNom, 'Zone fixe');
     });
