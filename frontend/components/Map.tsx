@@ -121,7 +121,7 @@ const Map = forwardRef<MapHandle, MapProps>(function Map(
             style: styleUrl,
             center: center,
             zoom: zoom,
-            attributionControl: true,
+            attributionControl: {},
         });
 
         // Add navigation controls

@@ -2,7 +2,8 @@
  * @jest-environment node
  */
 
-import {metadata, schemaOrgWebApp} from '../layout';
+import {metadata} from '../layout';
+import {schemaOrgWebApp} from '../../lib/schema';
 
 describe('layout metadata', () => {
     it('has correct title', () => {

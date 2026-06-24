@@ -3,6 +3,7 @@ import Script from 'next/script';
 import './globals.css';
 import Header from '@/components/Header';
 import {Toaster} from 'sonner';
+import {schemaOrgWebApp} from '@/lib/schema';
 
 export const metadata: Metadata = {
     title: 'NatureTranquille - Carte des zones sans chasse en France',
@@ -40,21 +41,6 @@ export const metadata: Metadata = {
             follow: true,
             'max-image-preview': 'large',
         },
-    },
-};
-
-export const schemaOrgWebApp = {
-    '@context': 'https://schema.org',
-    '@type': 'WebApplication',
-    name: 'NatureTranquille',
-    url: 'https://naturetranquille.fr',
-    description: 'Carte interactive des zones sans chasse en France',
-    applicationCategory: 'UtilitiesApplication',
-    operatingSystem: 'Web browser',
-    offers: {
-        '@type': 'Offer',
-        price: '0',
-        priceCurrency: 'EUR',
     },
 };
 
