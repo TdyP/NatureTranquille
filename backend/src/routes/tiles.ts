@@ -108,7 +108,7 @@ async function generateTile(z: number, x: number, y: number): Promise<Buffer | n
                     ST_TileEnvelope($1, $2, $3),
                     4096,
                     64,
-                    false
+                    true
                 ) AS geom
             FROM zones
             WHERE geometry && ST_Transform(ST_TileEnvelope($1, $2, $3), 4326)

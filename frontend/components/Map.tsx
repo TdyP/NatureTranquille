@@ -187,25 +187,6 @@ const Map = forwardRef<MapHandle, MapProps>(function Map(
                 },
             });
 
-            // Add labels layer for high zoom levels
-            map.current.addLayer({
-                id: 'zones-label',
-                type: 'symbol',
-                source: 'zones-sans-chasse',
-                'source-layer': 'zones',
-                minzoom: 14,
-                layout: {
-                    'text-field': ['get', 'nom'],
-                    'text-size': 14,
-                    'text-anchor': 'center',
-                },
-                paint: {
-                    'text-color': '#065f46', // green-900
-                    'text-halo-color': '#ffffff',
-                    'text-halo-width': 2,
-                },
-            });
-
             // Fit to department bounds if provided (no animation for SSG pages)
             if (initialBounds) {
                 map.current.fitBounds(initialBounds, {padding: 50, duration: 0});
@@ -213,16 +194,8 @@ const Map = forwardRef<MapHandle, MapProps>(function Map(
 
             // Filter zones by department if provided
             if (highlightDepartement) {
-                map.current.setFilter('zones-fill', [
-                    '==',
-                    ['get', 'codeDepartement'],
-                    highlightDepartement,
-                ]);
-                map.current.setFilter('zones-stroke', [
-                    '==',
-                    ['get', 'codeDepartement'],
-                    highlightDepartement,
-                ]);
+                map.current.setFilter('zones-fill', ['==', ['get', 'codeDepartement'], highlightDepartement]);
+                map.current.setFilter('zones-stroke', ['==', ['get', 'codeDepartement'], highlightDepartement]);
             }
 
             // Change cursor on hover
@@ -274,6 +247,8 @@ const Map = forwardRef<MapHandle, MapProps>(function Map(
                 const clickedId = clickedFeature.id as number;
                 const properties = clickedFeature.properties as ZoneProperties;
 
+                console.log('[DEBUG] Zone cliquée - ID:', clickedId, '- Nom:', properties.nom);
+
                 window.umami?.track('click_zone', {
                     zone_name: properties.nom,
                     zone_type: properties.typeProtection,
@@ -291,6 +266,14 @@ const Map = forwardRef<MapHandle, MapProps>(function Map(
                     selectedZoneIdRef.current = null;
                     setSelectedZone(null);
                 }
+            });
+
+            // Debug: log zoom level and rendered zone count
+            map.current.on('zoomend', () => {
+                if (!map.current) return;
+                console.log('[DEBUG] Niveau de zoom:', map.current.getZoom().toFixed(2));
+                const features = map.current.queryRenderedFeatures(undefined, {layers: ['zones-fill']});
+                console.log('[DEBUG] Zones rendues par MapLibre:', features.length);
             });
 
             setIsLoading(false);
