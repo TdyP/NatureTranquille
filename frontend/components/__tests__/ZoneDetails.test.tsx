@@ -84,9 +84,16 @@ describe('ZoneDetails Component', () => {
         it('has proper dialog role with aria-labelledby', () => {
             render(<ZoneDetails zone={mockZone} onClose={jest.fn()} />);
 
-            const region = screen.getByRole('region');
-            expect(region).toBeInTheDocument();
-            expect(region).toHaveAttribute('aria-labelledby', 'zone-title');
+            const dialog = screen.getByRole('dialog');
+            expect(dialog).toBeInTheDocument();
+            const labelledById = dialog.getAttribute('aria-labelledby');
+            expect(labelledById).toBeTruthy();
+            if (!labelledById) {
+                throw new Error('Expected dialog to have aria-labelledby');
+            }
+            const title = document.getElementById(labelledById);
+            expect(title).toBeInTheDocument();
+            expect(title).toHaveTextContent('Réserve Naturelle du Frankenthal');
         });
 
         it('has close button from SheetContent', () => {
@@ -101,12 +108,12 @@ describe('ZoneDetails Component', () => {
         it('uses semantic HTML with definition list', () => {
             render(<ZoneDetails zone={mockZone} onClose={jest.fn()} />);
 
-            const region = screen.getByRole('region');
-            const dl = region.querySelector('dl');
+            const dialog = screen.getByRole('dialog');
+            const dl = dialog.querySelector('dl');
             expect(dl).toBeInTheDocument();
 
-            const dts = region.querySelectorAll('dt');
-            const dds = region.querySelectorAll('dd');
+            const dts = dialog.querySelectorAll('dt');
+            const dds = dialog.querySelectorAll('dd');
             expect(dts.length).toBe(4); // 4 properties
             expect(dds.length).toBe(4);
         });

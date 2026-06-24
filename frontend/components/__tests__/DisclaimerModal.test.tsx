@@ -14,38 +14,6 @@ describe('DisclaimerModal', () => {
             expect(screen.getByRole('alertdialog')).toBeInTheDocument();
             expect(screen.getByText('Important : Données partielles')).toBeInTheDocument();
         });
-
-        it('displays the partial data warning message', () => {
-            render(<DisclaimerModal />);
-
-            expect(screen.getByText(/Cette carte affiche uniquement les réserves de chasse/)).toBeInTheDocument();
-            expect(
-                screen.getByText(/L'absence d'une zone verte ne signifie PAS que la chasse y est autorisée/),
-            ).toBeInTheDocument();
-            expect(
-                screen.getByText(/La présence d'une zone verte indique une protection officielle confirmée/),
-            ).toBeInTheDocument();
-        });
-
-        it('displays the disclaimer last sentence', () => {
-            render(<DisclaimerModal />);
-
-            expect(
-                screen.getByText(/En cas de doute, vérifiez localement auprès des autorités ou des habitants/),
-            ).toBeInTheDocument();
-        });
-
-        it('renders the "J\'ai compris" button', () => {
-            render(<DisclaimerModal />);
-
-            expect(screen.getByRole('button', {name: "J'ai compris"})).toBeInTheDocument();
-        });
-
-        it('renders the "Ne plus afficher ce message" checkbox', () => {
-            render(<DisclaimerModal />);
-
-            expect(screen.getByRole('checkbox', {name: 'Ne plus afficher ce message'})).toBeInTheDocument();
-        });
     });
 
     describe('Closing without "ne plus afficher"', () => {

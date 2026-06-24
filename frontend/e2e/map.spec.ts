@@ -1,5 +1,11 @@
 import {test, expect} from '@playwright/test';
 
+test.beforeEach(async ({page}) => {
+    await page.addInitScript(() => {
+        localStorage.setItem('disclaimer-accepted', 'true');
+    });
+});
+
 test.describe('Map Page - Performance', () => {
     test('should load and display map', async ({page}) => {
         await page.goto('/');
@@ -32,11 +38,12 @@ test.describe('Map Page - Performance', () => {
     test('should display navigation menu', async ({page}) => {
         await page.goto('/');
 
-        // Check navigation items are present
-        await expect(page.getByRole('link', {name: 'Accueil'})).toBeVisible();
-        await expect(page.getByRole('link', {name: 'Sources'})).toBeVisible();
-        await expect(page.getByRole('link', {name: 'À propos'})).toBeVisible();
-        await expect(page.getByRole('link', {name: 'Feedback'})).toBeVisible();
+        // Check desktop navigation items are present
+        const desktopNavigation = page.getByRole('navigation', {name: 'Navigation principale'});
+        await expect(desktopNavigation.getByRole('link', {name: 'Accueil'})).toBeVisible();
+        await expect(desktopNavigation.getByRole('link', {name: 'Sources'})).toBeVisible();
+        await expect(desktopNavigation.getByRole('link', {name: 'À propos'})).toBeVisible();
+        await expect(desktopNavigation.getByRole('link', {name: 'Feedback'})).toBeVisible();
     });
 
     test('should display map legend', async ({page}) => {
@@ -47,7 +54,7 @@ test.describe('Map Page - Performance', () => {
 
         // Check legend is visible
         await expect(page.getByText('Légende')).toBeVisible();
-        await expect(page.getByText('Zone sans chasse identifiée')).toBeVisible();
+        await expect(page.getByText('Réserve de chasse')).toBeVisible();
     });
 });
 

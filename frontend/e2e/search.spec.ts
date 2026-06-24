@@ -2,6 +2,9 @@ import {test, expect} from '@playwright/test';
 
 test.describe('Geographic Search', () => {
     test.beforeEach(async ({page}) => {
+        await page.addInitScript(() => {
+            localStorage.setItem('disclaimer-accepted', 'true');
+        });
         await page.goto('http://localhost:3000');
         // Wait for map to load
         await page.waitForSelector('[role="application"]');
@@ -54,8 +57,9 @@ test.describe('Geographic Search', () => {
         // Search for something that likely won't return results
         await searchInput.fill('XYZABC123');
 
-        // Wait for empty state message
-        await expect(page.getByText(/aucun résultat trouvé/i)).toBeVisible({timeout: 2000});
+        // Scope to the suggestion list to avoid matching the SR live region text
+        const suggestionsList = page.getByRole('listbox', {name: 'Suggestions'});
+        await expect(suggestionsList.getByText(/aucun résultat trouvé pour/i)).toBeVisible({timeout: 2000});
     });
 
     test('clear button removes search text', async ({page}) => {
@@ -101,8 +105,8 @@ test.describe('Geographic Search', () => {
         // Check for proper ARIA attributes
         await expect(searchInput).toHaveAttribute('aria-busy');
 
-        // Check for live region
-        const liveRegion = page.locator('[aria-live="polite"]');
+        // Scope to SearchBar dedicated live region
+        const liveRegion = page.locator('div.sr-only[aria-live="polite"][aria-atomic="true"]').first();
         await expect(liveRegion).toBeAttached();
 
         // Type and check live region updates
