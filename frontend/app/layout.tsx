@@ -11,6 +11,10 @@ export const metadata: Metadata = {
         'Carte interactive gratuite des zones sans chasse en France : réserves naturelles, RNCFS. Trouvez les zones protégées près de chez vous pour profiter de la nature en toute sérénité.',
     keywords:
         'zones sans chasse, réserves naturelles, RNCFS, carte chasse France, nature tranquille, randonnée sécurisée',
+    icons: {
+        icon: '/logo.svg',
+        shortcut: '/logo.svg',
+    },
     openGraph: {
         title: 'NatureTranquille - Zones sans chasse en France',
         description: 'Carte interactive des zones sans chasse',

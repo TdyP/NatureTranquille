@@ -2,6 +2,7 @@
 
 import {useState} from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import {Menu, X} from 'lucide-react';
 import {Button} from './ui/button';
 import {Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger} from './ui/sheet';
@@ -25,9 +26,10 @@ export default function Header() {
             <div className="flex h-16 items-center justify-between px-4 lg:px-6">
                 {/* Logo and title */}
                 <Link href="/" className="flex items-center gap-2 font-semibold text-foreground">
-                    <span className="text-xl">🌲</span>
-                    <span className="hidden sm:inline">NatureTranquille</span>
-                    <span className="sm:hidden">NT</span>
+                    <Image src="/logo.svg" alt="Logo NatureTranquille" width={28} height={28} priority />
+                    <span className="font-brand text-[1.1rem] font-bold leading-none tracking-[0.015em] sm:text-[1.15rem] lg:text-[1.2rem]">
+                        NatureTranquille
+                    </span>
                 </Link>
 
                 {/* Desktop navigation */}

@@ -1,9 +1,12 @@
+@import url('https://fonts.googleapis.com/css2?family=Gveret+Levin:wght@400;700&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 @layer base {
     :root {
+        --font-brand: 'Gveret Levin', ui-rounded, system-ui, sans-serif;
         --background: 0 0% 100%;
         --foreground: 222.2 84% 4.9%;
         --card: 0 0% 100%;
@@ -24,7 +27,7 @@
         --input: 214.3 31.8% 91.4%;
         --ring: 221.2 83.2% 53.3%;
         --radius: 0.5rem;
-        
+
         /* Zone colors - WCAG AA compliant (green-500 family) */
         --zone-fill: 142 71% 45%; /* #10b981 - Tailwind green-500 */
         --zone-stroke: 160 84% 39%; /* #059669 - Tailwind green-600 */
@@ -63,4 +66,3 @@
         @apply bg-background text-foreground;
     }
 }
-
