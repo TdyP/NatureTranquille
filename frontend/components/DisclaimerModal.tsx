@@ -42,21 +42,21 @@ export default function DisclaimerModal() {
                 <AlertDialogHeader className="space-y-4">
                     <AlertDialogTitle className="flex items-center justify-center gap-3 text-center text-black">
                         <Image src="/logo.svg" alt="Logo NatureTranquille" width={28} height={28} />
-                        Bienvenue sur NatureTranquille
+                        Bienvenue sur NatureTranquille !
                     </AlertDialogTitle>
                     <AlertDialogDescription asChild>
                         <div className="space-y-5 py-2 text-center leading-relaxed text-black sm:py-3">
                             <p>
-                                NatureTranquille recense les zones ou la chasse est interdite, comme certaines
-                                reserves de chasse, reserves naturelles et autres espaces proteges.
+                                NatureTranquille recense les zones où la chasse est interdite, comme certaines réserves
+                                de chasse, réserves naturelles et autres espaces protégés.
                             </p>
                             <p className="font-semibold text-foreground">
-                                La carte affiche uniquement les zones que nous avons pu identifier et valider a
-                                partir de sources publiques.
+                                La carte affiche uniquement les zones que nous avons pu identifier et valider à partir
+                                de sources publiques.
                             </p>
                             <p className="text-sm">
-                                Si une zone n&apos;apparait pas, cela ne signifie pas forcement que la chasse y est
-                                autorisee. En cas de doute, verifiez l&apos;information localement.
+                                Si une zone n&apos;apparaît pas, cela ne signifie pas forcément que la chasse y est
+                                autorisée. En cas de doute, vérifiez l&apos;information localement.
                             </p>
                         </div>
                     </AlertDialogDescription>
