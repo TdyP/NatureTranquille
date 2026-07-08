@@ -106,12 +106,8 @@ export default function AProposPage() {
                         disclaimer, sessionStorage cache recherche). Pas de cookies publicitaires ou tiers.
                     </p>
                     <p>
-                        <strong>Licence contenu</strong> : Les données cartographiques sont issues de sources publiques
-                        (voir{' '}
-                        <a href="/sources" className="text-primary hover:underline">
-                            page Sources
-                        </a>
-                        ). Le code source est sous licence MIT.
+                        <strong>Licence contenu</strong> : Les données cartographiques sont issues de sources publiques.
+                        Le code source est sous licence MIT.
                     </p>
                 </div>
             </section>

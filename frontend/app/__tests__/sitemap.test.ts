@@ -20,7 +20,6 @@ describe('sitemap()', () => {
         const urls = result.map((e) => e.url);
 
         expect(urls).toContain('https://naturetranquille.fr');
-        expect(urls).toContain('https://naturetranquille.fr/sources');
         expect(urls).toContain('https://naturetranquille.fr/a-propos');
         expect(urls).toContain('https://naturetranquille.fr/feedback');
     });
@@ -48,9 +47,7 @@ describe('sitemap()', () => {
     });
 
     it('department pages have priority 0.9 and weekly frequency', async () => {
-        getDepartementsWithZones.mockResolvedValueOnce([
-            {slug: 'haut-rhin-68', code: '68', nom: 'Haut-Rhin'},
-        ]);
+        getDepartementsWithZones.mockResolvedValueOnce([{slug: 'haut-rhin-68', code: '68', nom: 'Haut-Rhin'}]);
 
         const result = await sitemap();
         const dept = result.find((e) => e.url.includes('/departements/'));
@@ -59,18 +56,16 @@ describe('sitemap()', () => {
         expect(dept?.changeFrequency).toBe('weekly');
     });
 
-    it('returns at least 4 entries (static pages) even with no departments', async () => {
+    it('returns at least 3 entries (static pages) even with no departments', async () => {
         getDepartementsWithZones.mockResolvedValueOnce([]);
 
         const result = await sitemap();
 
-        expect(result.length).toBeGreaterThanOrEqual(4);
+        expect(result.length).toBeGreaterThanOrEqual(3);
     });
 
     it('all entries have a lastModified date', async () => {
-        getDepartementsWithZones.mockResolvedValueOnce([
-            {slug: 'bas-rhin-67', code: '67', nom: 'Bas-Rhin'},
-        ]);
+        getDepartementsWithZones.mockResolvedValueOnce([{slug: 'bas-rhin-67', code: '67', nom: 'Bas-Rhin'}]);
 
         const result = await sitemap();
 

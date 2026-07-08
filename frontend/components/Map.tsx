@@ -3,7 +3,6 @@
 import {useEffect, useRef, useState, useImperativeHandle, forwardRef} from 'react';
 import maplibregl, {Map as MapLibreMap, MapLayerMouseEvent, LngLatBoundsLike} from 'maplibre-gl';
 import 'maplibre-gl/dist/maplibre-gl.css';
-import MapLegend from './MapLegend';
 import ZoneDetails, {ZoneProperties} from './ZoneDetails';
 
 export interface MapProps {
@@ -324,7 +323,6 @@ const Map = forwardRef<MapHandle, MapProps>(function Map(
                 aria-label="Carte interactive des zones sans chasse en France"
                 tabIndex={0}
             />
-            <MapLegend />
             <ZoneDetails zone={selectedZone} onClose={handleCloseZoneDetails} />
         </div>
     );

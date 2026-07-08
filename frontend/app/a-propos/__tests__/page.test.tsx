@@ -91,13 +91,6 @@ describe('AProposPage', () => {
             expect(screen.getByText(/Pas de cookies publicitaires/)).toBeInTheDocument();
         });
 
-        it('links to sources page', () => {
-            render(<AProposPage />);
-
-            const sourcesLink = screen.getByRole('link', {name: 'page Sources'});
-            expect(sourcesLink).toHaveAttribute('href', '/sources');
-        });
-
         it('mentions MIT licence', () => {
             render(<AProposPage />);
 

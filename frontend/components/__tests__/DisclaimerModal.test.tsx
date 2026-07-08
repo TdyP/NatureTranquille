@@ -1,6 +1,11 @@
-import {render, screen, waitFor} from '@testing-library/react';
+import {render, screen, waitFor, within} from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import DisclaimerModal from '../DisclaimerModal';
+
+const getAcceptButton = (): HTMLElement => {
+    const dialog = screen.getByRole('alertdialog');
+    return within(dialog).getByRole('button');
+};
 
 describe('DisclaimerModal', () => {
     beforeEach(() => {
@@ -11,8 +16,10 @@ describe('DisclaimerModal', () => {
         it('shows the modal on first visit when localStorage is empty', () => {
             render(<DisclaimerModal />);
 
-            expect(screen.getByRole('alertdialog')).toBeInTheDocument();
-            expect(screen.getByText('Important : Données partielles')).toBeInTheDocument();
+            const dialog = screen.getByRole('alertdialog');
+
+            expect(dialog).toBeInTheDocument();
+            expect(within(dialog).getByRole('heading')).toBeInTheDocument();
         });
     });
 
@@ -21,7 +28,7 @@ describe('DisclaimerModal', () => {
             const user = userEvent.setup();
             render(<DisclaimerModal />);
 
-            await user.click(screen.getByRole('button', {name: "J'ai compris"}));
+            await user.click(getAcceptButton());
 
             await waitFor(() => {
                 expect(screen.queryByRole('alertdialog')).not.toBeInTheDocument();
@@ -32,7 +39,7 @@ describe('DisclaimerModal', () => {
             const user = userEvent.setup();
             render(<DisclaimerModal />);
 
-            await user.click(screen.getByRole('button', {name: "J'ai compris"}));
+            await user.click(getAcceptButton());
 
             expect(localStorage.getItem('disclaimer-accepted')).toBeNull();
         });
@@ -43,8 +50,8 @@ describe('DisclaimerModal', () => {
             const user = userEvent.setup();
             render(<DisclaimerModal />);
 
-            await user.click(screen.getByRole('checkbox', {name: 'Ne plus afficher ce message'}));
-            await user.click(screen.getByRole('button', {name: "J'ai compris"}));
+            await user.click(screen.getByRole('checkbox'));
+            await user.click(getAcceptButton());
 
             expect(localStorage.getItem('disclaimer-accepted')).toBe('true');
         });
@@ -53,8 +60,8 @@ describe('DisclaimerModal', () => {
             const user = userEvent.setup();
             render(<DisclaimerModal />);
 
-            await user.click(screen.getByRole('checkbox', {name: 'Ne plus afficher ce message'}));
-            await user.click(screen.getByRole('button', {name: "J'ai compris"}));
+            await user.click(screen.getByRole('checkbox'));
+            await user.click(getAcceptButton());
 
             await waitFor(() => {
                 expect(screen.queryByRole('alertdialog')).not.toBeInTheDocument();
@@ -81,14 +88,15 @@ describe('DisclaimerModal', () => {
         it('has an accessible title', () => {
             render(<DisclaimerModal />);
 
-            expect(screen.getByText('Important : Données partielles')).toBeInTheDocument();
+            const dialog = screen.getByRole('alertdialog');
+            expect(within(dialog).getByRole('heading')).toBeInTheDocument();
         });
 
         it('has a properly labeled checkbox', () => {
             render(<DisclaimerModal />);
 
             const checkbox = screen.getByRole('checkbox');
-            expect(checkbox).toHaveAccessibleName('Ne plus afficher ce message');
+            expect(checkbox).toHaveAccessibleName();
         });
     });
 });

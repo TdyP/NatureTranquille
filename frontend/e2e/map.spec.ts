@@ -41,20 +41,8 @@ test.describe('Map Page - Performance', () => {
         // Check desktop navigation items are present
         const desktopNavigation = page.getByRole('navigation', {name: 'Navigation principale'});
         await expect(desktopNavigation.getByRole('link', {name: 'Accueil'})).toBeVisible();
-        await expect(desktopNavigation.getByRole('link', {name: 'Sources'})).toBeVisible();
         await expect(desktopNavigation.getByRole('link', {name: 'À propos'})).toBeVisible();
         await expect(desktopNavigation.getByRole('link', {name: 'Feedback'})).toBeVisible();
-    });
-
-    test('should display map legend', async ({page}) => {
-        await page.goto('/');
-
-        // Wait for map to load
-        await expect(page.getByText('Chargement de la carte...')).toBeHidden({timeout: 10000});
-
-        // Check legend is visible
-        await expect(page.getByText('Légende')).toBeVisible();
-        await expect(page.getByText('Réserve de chasse')).toBeVisible();
     });
 });
 

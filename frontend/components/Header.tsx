@@ -9,7 +9,6 @@ import {Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTri
 
 const navigationItems = [
     {label: 'Accueil', href: '/'},
-    {label: 'Sources', href: '/sources'},
     {label: 'À propos', href: '/a-propos'},
     {label: 'Feedback', href: '/feedback'},
 ];
