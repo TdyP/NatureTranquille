@@ -1,7 +1,7 @@
 'use client';
 
 import {useState, useEffect} from 'react';
-import {AlertTriangle} from 'lucide-react';
+import Image from 'next/image';
 import {
     AlertDialog,
     AlertDialogAction,
@@ -35,45 +35,44 @@ export default function DisclaimerModal() {
 
     return (
         <AlertDialog open={showDisclaimer} onOpenChange={() => {}}>
-            <AlertDialogContent className="max-w-md" onEscapeKeyDown={(e) => e.preventDefault()}>
-                <AlertDialogHeader>
-                    <AlertDialogTitle className="flex items-center gap-2">
-                        <AlertTriangle className="h-5 w-5 text-yellow-500" aria-hidden="true" />
-                        Important : Données partielles
+            <AlertDialogContent
+                className="flex max-h-[85vh] max-w-2xl flex-col overflow-y-auto px-8 py-6 sm:px-10 sm:py-8"
+                onEscapeKeyDown={(e) => e.preventDefault()}
+            >
+                <AlertDialogHeader className="space-y-4">
+                    <AlertDialogTitle className="flex items-center justify-center gap-3 text-center text-black">
+                        <Image src="/logo.svg" alt="Logo NatureTranquille" width={28} height={28} />
+                        Bienvenue sur NatureTranquille
                     </AlertDialogTitle>
                     <AlertDialogDescription asChild>
-                        <div className="space-y-5">
+                        <div className="space-y-5 py-2 text-center leading-relaxed text-black sm:py-3">
                             <p>
-                                Cette carte affiche uniquement les réserves de chasse que nous avons pu identifier et
-                                valider.
+                                NatureTranquille recense les zones ou la chasse est interdite, comme certaines
+                                reserves de chasse, reserves naturelles et autres espaces proteges.
                             </p>
-                            <ul className="space-y-4">
-                                <li>
-                                    ✅ La présence d&apos;une zone verte indique une protection officielle confirmée
-                                </li>
-                                <li>
-                                    ❌ L&apos;absence d&apos;une zone verte ne signifie pas que la chasse y est
-                                    autorisée. Cela peut être dû à un manque de données.
-                                </li>
-                            </ul>
+                            <p className="font-semibold text-foreground">
+                                La carte affiche uniquement les zones que nous avons pu identifier et valider a
+                                partir de sources publiques.
+                            </p>
                             <p className="text-sm">
-                                En cas de doute, vérifiez localement auprès des autorités ou des habitants.
+                                Si une zone n&apos;apparait pas, cela ne signifie pas forcement que la chasse y est
+                                autorisee. En cas de doute, verifiez l&apos;information localement.
                             </p>
                         </div>
                     </AlertDialogDescription>
                 </AlertDialogHeader>
-                <AlertDialogFooter className="flex-col gap-3">
-                    <div className="flex items-center gap-2">
+                <AlertDialogFooter className="mt-4 flex-col gap-3 pt-2">
+                    <div className="flex items-center justify-center gap-2">
                         <Checkbox
                             id="no-show"
                             checked={noShowAgain}
                             onCheckedChange={(checked) => setNoShowAgain(checked === true)}
                         />
-                        <label htmlFor="no-show" className="text-sm cursor-pointer">
+                        <label htmlFor="no-show" className="cursor-pointer text-sm text-black">
                             Ne plus afficher ce message
                         </label>
                     </div>
-                    <AlertDialogAction onClick={handleAccept}>J&apos;ai compris</AlertDialogAction>
+                    <AlertDialogAction onClick={handleAccept}>Decouvrir la carte</AlertDialogAction>
                 </AlertDialogFooter>
             </AlertDialogContent>
         </AlertDialog>
