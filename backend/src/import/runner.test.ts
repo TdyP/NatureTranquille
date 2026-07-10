@@ -20,7 +20,10 @@ describe('runImport', () => {
     function makePool(isValid = true): Pool {
         return {
             query: mock.fn(async (sql: string) => {
-                if (sql.includes('SELECT')) {
+                if (sql.includes('INSERT')) {
+                    return {rowCount: 1, rows: []};
+                }
+                if (sql.startsWith('SELECT ST_IsValid')) {
                     return {rows: [{is_valid: isValid}]};
                 }
                 return {rows: []};
@@ -103,7 +106,7 @@ describe('runImport', () => {
             query: mock.fn(async (sql: string, params: unknown[]) => {
                 if (sql.includes('INSERT')) {
                     insertedNom = params[0] as string;
-                    return {rows: []};
+                    return {rowCount: 1, rows: []};
                 }
                 return {rows: [{is_valid: true}]};
             }),
@@ -129,7 +132,7 @@ describe('runImport', () => {
             query: mock.fn(async (sql: string, params: unknown[]) => {
                 if (sql.includes('INSERT')) {
                     insertedNom = params[0] as string;
-                    return {rows: []};
+                    return {rowCount: 1, rows: []};
                 }
                 return {rows: [{is_valid: true}]};
             }),

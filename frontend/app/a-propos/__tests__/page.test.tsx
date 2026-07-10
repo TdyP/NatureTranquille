@@ -14,9 +14,8 @@ describe('AProposPage', () => {
 
             expect(screen.getByRole('heading', {level: 2, name: 'Notre mission'})).toBeInTheDocument();
             expect(screen.getByRole('heading', {level: 2, name: 'Contexte du projet'})).toBeInTheDocument();
-            expect(screen.getByRole('heading', {level: 2, name: 'Porteur du projet'})).toBeInTheDocument();
-            expect(screen.getByRole('heading', {level: 2, name: 'Contact'})).toBeInTheDocument();
-            expect(screen.getByRole('heading', {level: 2, name: 'Mentions légales'})).toBeInTheDocument();
+            expect(screen.getByRole('heading', {level: 2, name: 'Qui sommes-nous ?'})).toBeInTheDocument();
+            expect(screen.getByRole('heading', {level: 2, name: 'Contribuer au projet'})).toBeInTheDocument();
         });
 
         it('has a main landmark', () => {
@@ -46,23 +45,17 @@ describe('AProposPage', () => {
         it('renders email mailto link', () => {
             render(<AProposPage />);
 
-            const emailLink = screen.getByRole('link', {name: 'contact@naturetranquille.fr'});
-            expect(emailLink).toHaveAttribute('href', 'mailto:contact@naturetranquille.fr');
+            const emailLink = screen.getByRole('link', {name: 'hello@teddypaul.fr'});
+            expect(emailLink).toHaveAttribute('href', 'mailto:hello+nt@teddypaul.fr');
         });
 
-        it('renders feedback page link', () => {
+        it('renders LinkedIn link with security attributes', () => {
             render(<AProposPage />);
 
-            const feedbackLink = screen.getByRole('link', {name: 'Page Feedback'});
-            expect(feedbackLink).toHaveAttribute('href', '/feedback');
-        });
-
-        it('renders GitHub issues link with security attributes', () => {
-            render(<AProposPage />);
-
-            const githubLink = screen.getByRole('link', {name: 'Ouvrir un ticket'});
-            expect(githubLink).toHaveAttribute('target', '_blank');
-            expect(githubLink).toHaveAttribute('rel', 'noopener noreferrer');
+            const linkedinLink = screen.getByRole('link', {name: 'Teddy Paul'});
+            expect(linkedinLink).toHaveAttribute('href', 'https://www.linkedin.com/in/teddypaul');
+            expect(linkedinLink).toHaveAttribute('target', '_blank');
+            expect(linkedinLink).toHaveAttribute('rel', 'noopener noreferrer');
         });
     });
 
@@ -71,31 +64,9 @@ describe('AProposPage', () => {
             render(<AProposPage />);
 
             const githubLink = screen.getByRole('link', {name: 'GitHub NatureTranquille'});
-            expect(githubLink).toHaveAttribute('href', 'https://github.com/TdyP/naturetranquille');
+            expect(githubLink).toHaveAttribute('href', 'https://github.com/TdyP/NatureTranquille');
             expect(githubLink).toHaveAttribute('target', '_blank');
             expect(githubLink).toHaveAttribute('rel', 'noopener noreferrer');
-        });
-    });
-
-    describe('Legal notices', () => {
-        it('mentions no personal data collection without consent', () => {
-            render(<AProposPage />);
-
-            expect(screen.getByText(/ne collecte aucune donnée personnelle sans consentement/)).toBeInTheDocument();
-        });
-
-        it('mentions only technical cookies', () => {
-            render(<AProposPage />);
-
-            expect(screen.getByText(/cookies techniques/)).toBeInTheDocument();
-            expect(screen.getByText(/Pas de cookies publicitaires/)).toBeInTheDocument();
-        });
-
-        it('mentions MIT licence', () => {
-            render(<AProposPage />);
-
-            const main = screen.getByRole('main');
-            expect(main.textContent).toMatch(/MIT/);
         });
     });
 
@@ -118,7 +89,7 @@ describe('AProposPage', () => {
             const h2 = screen.getAllByRole('heading', {level: 2});
 
             expect(h1).toHaveLength(1);
-            expect(h2.length).toBeGreaterThanOrEqual(5);
+            expect(h2.length).toBeGreaterThanOrEqual(4);
         });
 
         it('link text is descriptive (no "cliquez ici")', () => {
