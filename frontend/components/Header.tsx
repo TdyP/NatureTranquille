@@ -5,7 +5,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import {Menu, X} from 'lucide-react';
 import {Button} from './ui/button';
-import {Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger} from './ui/sheet';
+import {Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger} from './ui/sheet';
 
 const navigationItems = [
     {label: 'Accueil', href: '/'},
@@ -63,8 +63,7 @@ export default function Header() {
                         </SheetTrigger>
                         <SheetContent side="left">
                             <SheetHeader>
-                                <SheetTitle>Menu</SheetTitle>
-                                <SheetDescription>Navigation du site</SheetDescription>
+                                <SheetTitle>Menu principal</SheetTitle>
                             </SheetHeader>
                             <nav className="mt-6" aria-label="Navigation mobile">
                                 <ul className="space-y-4">
