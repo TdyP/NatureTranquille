@@ -45,11 +45,10 @@ export default function AProposPage() {
                 <h2 className="text-2xl font-semibold mb-3">Qui sommes-nous ?</h2>
                 <div className="prose">
                     <p>
-                        Ce projet est développé par <strong>Teddy Paul</strong>, passionné de nature et de développement web.
+                        Ce projet est développé par <strong>Teddy Paul</strong>, développeur web freelance et passionné
+                        de nature.
                     </p>
-                    <p className="mt-2">
-                        Pour me contacter :
-                    </p>
+                    <p className="mt-2">Pour me contacter :</p>
                     <ul className="list-disc list-inside mt-2 space-y-1">
                         <li>
                             LinkedIn :{' '}
@@ -59,12 +58,12 @@ export default function AProposPage() {
                                 rel="noopener noreferrer"
                                 className="text-primary hover:underline"
                             >
-                                Teddy Paul sur LinkedIn
+                                Teddy Paul
                             </a>
                         </li>
                         <li>
                             Email :{' '}
-                            <a href="mailto:hello@teddypaul.fr" className="text-primary hover:underline">
+                            <a href="mailto:hello+nt@teddypaul.fr" className="text-primary hover:underline">
                                 hello@teddypaul.fr
                             </a>
                         </li>
@@ -75,11 +74,9 @@ export default function AProposPage() {
             <section className="mb-8">
                 <h2 className="text-2xl font-semibold mb-3">Contribuer au projet</h2>
                 <div className="prose">
-                    <p>
-                        NatureTranquille est un projet open source et nous sommes ravis d&apos;accueillir des contributions !
-                    </p>
                     <p className="mt-2">
-                        Que vous souhaitiez signaler un bug, proposer une amélioration ou contribuer au code, n&apos;hésitez pas à visiter notre dépôt :
+                        Que vous souhaitiez signaler un bug, contribuer au code, toutes les contributions sont les
+                        bienvenues:
                     </p>
                     <p className="mt-2">
                         <a
@@ -92,36 +89,6 @@ export default function AProposPage() {
                         </a>
                     </p>
                 </div>
-            </section>
-
-            <section className="mb-8">
-                <h2 className="text-2xl font-semibold mb-3">Contact</h2>
-                <p>Pour signaler une erreur, suggérer une amélioration, ou proposer de nouvelles données :</p>
-                <ul className="list-disc list-inside mt-2 space-y-1">
-                    <li>
-                        Email :{' '}
-                        <a href="mailto:contact@naturetranquille.fr" className="text-primary hover:underline">
-                            contact@naturetranquille.fr
-                        </a>
-                    </li>
-                    <li>
-                        Formulaire :{' '}
-                        <a href="/feedback" className="text-primary hover:underline">
-                            Page Feedback
-                        </a>
-                    </li>
-                    <li>
-                        GitHub Issues :{' '}
-                        <a
-                            href="https://github.com/TdyP/naturetranquille/issues"
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="text-primary hover:underline"
-                        >
-                            Ouvrir un ticket
-                        </a>
-                    </li>
-                </ul>
             </section>
         </main>
     );
