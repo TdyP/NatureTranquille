@@ -67,20 +67,32 @@ async function importSource(
                 sourceResult.corrected++;
             }
 
-            await pool.query(
-                `INSERT INTO public.zones (nom, type_protection, gestionnaire, source, date_maj, geometry)
-                 VALUES (
-                     $1, $2, $3, $4, NOW(),
-                     ST_Multi(
-                         CASE WHEN ST_IsValid(ST_GeomFromGeoJSON($5))
-                              THEN ST_GeomFromGeoJSON($5)
-                              ELSE ST_MakeValid(ST_GeomFromGeoJSON($5))
-                         END
-                     )::geometry(MULTIPOLYGON, 4326)
-                 )`,
+            const insertResult = await pool.query(
+                `WITH candidate AS (
+                    SELECT
+                        ST_Multi(
+                            CASE WHEN ST_IsValid(ST_GeomFromGeoJSON($5))
+                                 THEN ST_GeomFromGeoJSON($5)
+                                 ELSE ST_MakeValid(ST_GeomFromGeoJSON($5))
+                            END
+                        )::geometry(MULTIPOLYGON, 4326) AS geometry
+                )
+                INSERT INTO public.zones (nom, type_protection, gestionnaire, source, date_maj, geometry)
+                SELECT $1, $2, $3, $4, NOW(), c.geometry
+                FROM candidate c
+                WHERE NOT EXISTS (
+                    SELECT 1
+                    FROM public.zones z
+                    WHERE md5(ST_AsBinary(z.geometry)) = md5(ST_AsBinary(c.geometry))
+                )`,
                 [nom, typeProtection, gestionnaire, source.sourceValue, geomJson],
             );
-            sourceResult.inserted++;
+
+            if (insertResult.rowCount === 1) {
+                sourceResult.inserted++;
+            } else {
+                sourceResult.skipped++;
+            }
         } catch (err) {
             sourceResult.skipped++;
             console.error(`Skipped feature from ${source.file}: ${(err as Error).message}`);
