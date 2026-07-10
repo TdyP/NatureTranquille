@@ -26,28 +26,24 @@ function createMailTransporter() {
 
 async function sendTeamEmail(
     transporter: nodemailer.Transporter,
-    data: {type: string; localisation: string; description: string; email?: string},
+    data: {type: string; description: string; email?: string},
 ): Promise<void> {
     const from = process.env.SMTP_FROM ?? 'no-reply@naturetranquille.fr';
     await transporter.sendMail({
         from,
         to: 'contact@naturetranquille.fr',
         subject: `[NatureTranquille] Nouveau signalement : ${data.type}`,
-        text: `Type : ${data.type}\nLocalisation : ${data.localisation}\nDescription : ${data.description}\nEmail : ${data.email || 'Non renseigné'}`,
+        text: `Type : ${data.type}\nDescription : ${data.description}\nEmail : ${data.email || 'Non renseigné'}`,
     });
 }
 
-async function sendUserConfirmationEmail(
-    transporter: nodemailer.Transporter,
-    to: string,
-    localisation: string,
-): Promise<void> {
+async function sendUserConfirmationEmail(transporter: nodemailer.Transporter, to: string): Promise<void> {
     const from = process.env.SMTP_FROM ?? 'no-reply@naturetranquille.fr';
     await transporter.sendMail({
         from,
         to,
         subject: 'Signalement reçu – NatureTranquille',
-        text: `Bonjour,\n\nNous avons bien reçu votre signalement concernant : ${localisation}\n\nNotre équipe l'analysera dans les prochains jours.\n\nMerci de contribuer à l'amélioration de NatureTranquille !\n\nL'équipe NatureTranquille`,
+        text: "Bonjour,\n\nNous avons bien reçu votre signalement.\n\nNotre équipe l'analysera dans les prochains jours.\n\nMerci de contribuer à l'amélioration de NatureTranquille !\n\nL'équipe NatureTranquille",
     });
 }
 
@@ -80,12 +76,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     const recentCount = await db
         .select({count: count()})
         .from(signalements)
-        .where(
-            and(
-                sql`${signalements.ipHash} = ${ipHash}`,
-                gt(signalements.createdAt, oneMinuteAgo),
-            ),
-        );
+        .where(and(sql`${signalements.ipHash} = ${ipHash}`, gt(signalements.createdAt, oneMinuteAgo)));
 
     if ((recentCount[0]?.count ?? 0) > 0) {
         return NextResponse.json({error: 'Too many requests'}, {status: 429});
@@ -94,7 +85,6 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     // Insert into DB
     await db.insert(signalements).values({
         type: data.type,
-        localisation: data.localisation,
         description: data.description,
         email: data.email || null,
         ipHash,
@@ -105,7 +95,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     if (transporter) {
         const emailPromises: Promise<void>[] = [sendTeamEmail(transporter, data)];
         if (data.email) {
-            emailPromises.push(sendUserConfirmationEmail(transporter, data.email, data.localisation));
+            emailPromises.push(sendUserConfirmationEmail(transporter, data.email));
         }
         await Promise.allSettled(emailPromises);
     }

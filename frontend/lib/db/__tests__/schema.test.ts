@@ -13,8 +13,16 @@ describe('signalements Drizzle schema', () => {
     it('has all required columns', () => {
         const columns = getTableColumns(signalements);
         const expected = [
-            'id', 'type', 'localisation', 'description', 'email',
-            'ipHash', 'status', 'notesInternes', 'zoneId', 'createdAt', 'updatedAt',
+            'id',
+            'type',
+            'description',
+            'email',
+            'ipHash',
+            'status',
+            'notesInternes',
+            'zoneId',
+            'createdAt',
+            'updatedAt',
         ] as const;
 
         for (const col of expected) {
@@ -31,13 +39,6 @@ describe('signalements Drizzle schema', () => {
         const columns = getTableColumns(signalements);
         const col = columns.type as {length?: number; notNull: boolean};
         expect(col.length).toBe(50);
-        expect(col.notNull).toBe(true);
-    });
-
-    it('localisation column has max length of 200 and is not null', () => {
-        const columns = getTableColumns(signalements);
-        const col = columns.localisation as {length?: number; notNull: boolean};
-        expect(col.length).toBe(200);
         expect(col.notNull).toBe(true);
     });
 

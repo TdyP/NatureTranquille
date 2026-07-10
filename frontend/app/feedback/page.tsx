@@ -19,7 +19,6 @@ export default function FeedbackPage() {
         resolver: zodResolver(feedbackSchema),
         defaultValues: {
             type: 'erreur',
-            localisation: '',
             description: '',
             email: '',
         },
@@ -36,7 +35,9 @@ export default function FeedbackPage() {
         });
 
         if (res.ok) {
-            toast.success('Signalement envoyé, merci ! Vous recevrez une confirmation par email si vous en avez fourni un.');
+            toast.success(
+                'Signalement envoyé, merci ! Vous recevrez une confirmation par email si vous en avez fourni un.',
+            );
             reset();
             setHoneypot('');
         } else if (res.status === 429) {
@@ -90,26 +91,6 @@ export default function FeedbackPage() {
                 </div>
 
                 <div>
-                    <label htmlFor="localisation" className="block text-sm font-medium mb-2">
-                        Localisation <span aria-hidden="true">*</span>
-                    </label>
-                    <input
-                        id="localisation"
-                        type="text"
-                        {...register('localisation')}
-                        placeholder="ex : Réserve de la Petite Camargue Alsacienne"
-                        className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
-                        aria-describedby={errors.localisation ? 'localisation-error' : undefined}
-                        aria-invalid={!!errors.localisation}
-                    />
-                    {errors.localisation && (
-                        <p id="localisation-error" className="text-sm text-destructive mt-1" role="alert">
-                            {errors.localisation.message}
-                        </p>
-                    )}
-                </div>
-
-                <div>
                     <label htmlFor="description" className="block text-sm font-medium mb-2">
                         Description <span aria-hidden="true">*</span>
                         <span className="text-muted-foreground font-normal ml-2">
@@ -136,7 +117,9 @@ export default function FeedbackPage() {
                 <div>
                     <label htmlFor="email" className="block text-sm font-medium mb-2">
                         Email{' '}
-                        <span className="text-muted-foreground font-normal">(optionnel, pour recevoir une réponse)</span>
+                        <span className="text-muted-foreground font-normal">
+                            (optionnel, pour recevoir une réponse)
+                        </span>
                     </label>
                     <input
                         id="email"

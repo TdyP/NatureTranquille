@@ -6,7 +6,6 @@ export const signalements = pgTable(
     {
         id: serial('id').primaryKey(),
         type: varchar('type', {length: 50}).notNull(),
-        localisation: varchar('localisation', {length: 200}).notNull(),
         description: text('description').notNull(),
         email: varchar('email', {length: 255}),
         ipHash: varchar('ip_hash', {length: 64}).notNull(),

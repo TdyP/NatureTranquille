@@ -22,7 +22,6 @@ describe('FeedbackPage', () => {
 
         expect(screen.getByRole('heading', {level: 1})).toHaveTextContent('Signaler une erreur');
         expect(screen.getByLabelText(/type de signalement/i)).toBeInTheDocument();
-        expect(screen.getByLabelText(/localisation/i)).toBeInTheDocument();
         expect(screen.getByLabelText(/description/i)).toBeInTheDocument();
         expect(screen.getByLabelText(/email/i)).toBeInTheDocument();
         expect(screen.getByRole('button', {name: /envoyer/i})).toBeInTheDocument();
@@ -46,10 +45,6 @@ describe('FeedbackPage', () => {
         const user = userEvent.setup();
         render(<FeedbackPage />);
 
-        // Clear localisation and description then submit
-        const localisationInput = screen.getByLabelText(/localisation/i);
-        await user.clear(localisationInput);
-
         const descriptionTextarea = screen.getByLabelText(/description/i);
         await user.clear(descriptionTextarea);
 
@@ -57,7 +52,7 @@ describe('FeedbackPage', () => {
         await user.click(submitButton);
 
         await waitFor(() => {
-            expect(screen.getByText(/minimum 3 caractères/i)).toBeInTheDocument();
+            expect(screen.getByText(/minimum 10 caractères/i)).toBeInTheDocument();
         });
     });
 
@@ -65,7 +60,6 @@ describe('FeedbackPage', () => {
         const user = userEvent.setup();
         render(<FeedbackPage />);
 
-        await user.type(screen.getByLabelText(/localisation/i), 'Forêt de Fontainebleau');
         await user.type(screen.getByLabelText(/description/i), 'Court');
         await user.click(screen.getByRole('button', {name: /envoyer/i}));
 
@@ -78,7 +72,6 @@ describe('FeedbackPage', () => {
         const user = userEvent.setup();
         render(<FeedbackPage />);
 
-        await user.type(screen.getByLabelText(/localisation/i), 'Forêt de Fontainebleau');
         await user.type(screen.getByLabelText(/description/i), 'Description suffisamment longue');
         await user.type(screen.getByLabelText(/email/i), 'not-an-email');
         await user.click(screen.getByRole('button', {name: /envoyer/i}));
@@ -93,8 +86,10 @@ describe('FeedbackPage', () => {
         mockFetch.mockResolvedValueOnce({ok: true});
         render(<FeedbackPage />);
 
-        await user.type(screen.getByLabelText(/localisation/i), 'Forêt de Fontainebleau');
-        await user.type(screen.getByLabelText(/description/i), 'Description suffisamment longue pour passer la validation');
+        await user.type(
+            screen.getByLabelText(/description/i),
+            'Description suffisamment longue pour passer la validation',
+        );
         await user.click(screen.getByRole('button', {name: /envoyer/i}));
 
         await waitFor(() => {
@@ -108,8 +103,10 @@ describe('FeedbackPage', () => {
         render(<FeedbackPage />);
 
         await user.selectOptions(screen.getByLabelText(/type de signalement/i), 'suggestion');
-        await user.type(screen.getByLabelText(/localisation/i), 'Réserve Petite Camargue');
-        await user.type(screen.getByLabelText(/description/i), 'Il manque cette zone sur la carte, pouvez-vous l\'ajouter ?');
+        await user.type(
+            screen.getByLabelText(/description/i),
+            "Il manque cette zone sur la carte, pouvez-vous l'ajouter ?",
+        );
         await user.type(screen.getByLabelText(/email/i), 'test@example.com');
 
         await user.click(screen.getByRole('button', {name: /envoyer/i}));
@@ -132,8 +129,10 @@ describe('FeedbackPage', () => {
         mockFetch.mockResolvedValueOnce({ok: true, status: 200});
         render(<FeedbackPage />);
 
-        await user.type(screen.getByLabelText(/localisation/i), 'Forêt de Fontainebleau');
-        await user.type(screen.getByLabelText(/description/i), 'Description suffisamment longue pour passer la validation');
+        await user.type(
+            screen.getByLabelText(/description/i),
+            'Description suffisamment longue pour passer la validation',
+        );
         await user.click(screen.getByRole('button', {name: /envoyer/i}));
 
         await waitFor(() => {
@@ -147,12 +146,14 @@ describe('FeedbackPage', () => {
         mockFetch.mockResolvedValueOnce({ok: false, status: 500});
         render(<FeedbackPage />);
 
-        await user.type(screen.getByLabelText(/localisation/i), 'Forêt de Fontainebleau');
-        await user.type(screen.getByLabelText(/description/i), 'Description suffisamment longue pour passer la validation');
+        await user.type(
+            screen.getByLabelText(/description/i),
+            'Description suffisamment longue pour passer la validation',
+        );
         await user.click(screen.getByRole('button', {name: /envoyer/i}));
 
         await waitFor(() => {
-            expect(toast.error).toHaveBeenCalledWith(expect.stringContaining("Erreur"));
+            expect(toast.error).toHaveBeenCalledWith(expect.stringContaining('Erreur'));
         });
     });
 
@@ -162,8 +163,10 @@ describe('FeedbackPage', () => {
         mockFetch.mockResolvedValueOnce({ok: false, status: 429});
         render(<FeedbackPage />);
 
-        await user.type(screen.getByLabelText(/localisation/i), 'Forêt de Fontainebleau');
-        await user.type(screen.getByLabelText(/description/i), 'Description suffisamment longue pour passer la validation');
+        await user.type(
+            screen.getByLabelText(/description/i),
+            'Description suffisamment longue pour passer la validation',
+        );
         await user.click(screen.getByRole('button', {name: /envoyer/i}));
 
         await waitFor(() => {
@@ -175,7 +178,6 @@ describe('FeedbackPage', () => {
         render(<FeedbackPage />);
 
         expect(screen.getByLabelText(/type de signalement/i)).toBeInTheDocument();
-        expect(screen.getByLabelText(/localisation/i)).toBeInTheDocument();
         expect(screen.getByLabelText(/description/i)).toBeInTheDocument();
         expect(screen.getByLabelText(/email/i)).toBeInTheDocument();
     });
@@ -184,7 +186,6 @@ describe('FeedbackPage', () => {
         const user = userEvent.setup();
         render(<FeedbackPage />);
 
-        await user.clear(screen.getByLabelText(/localisation/i));
         await user.clear(screen.getByLabelText(/description/i));
         await user.click(screen.getByRole('button', {name: /envoyer/i}));
 
@@ -207,11 +208,17 @@ describe('FeedbackPage', () => {
     it('submit button is disabled while submitting', async () => {
         const user = userEvent.setup();
         let resolveFetch: (value: unknown) => void;
-        mockFetch.mockReturnValueOnce(new Promise((resolve) => {resolveFetch = resolve;}));
+        mockFetch.mockReturnValueOnce(
+            new Promise((resolve) => {
+                resolveFetch = resolve;
+            }),
+        );
         render(<FeedbackPage />);
 
-        await user.type(screen.getByLabelText(/localisation/i), 'Forêt de Fontainebleau');
-        await user.type(screen.getByLabelText(/description/i), 'Description suffisamment longue pour passer la validation');
+        await user.type(
+            screen.getByLabelText(/description/i),
+            'Description suffisamment longue pour passer la validation',
+        );
         await user.click(screen.getByRole('button', {name: /envoyer/i}));
 
         await waitFor(() => {

@@ -19,9 +19,12 @@ jest.mock('@/lib/db/schema', () => ({
 jest.mock('drizzle-orm', () => ({
     and: jest.fn((...args: unknown[]) => args),
     gt: jest.fn((col: unknown, val: unknown) => ({col, val})),
-    sql: Object.assign(jest.fn((strings: TemplateStringsArray, ...values: unknown[]) => ({strings, values})), {
-        raw: jest.fn(),
-    }),
+    sql: Object.assign(
+        jest.fn((strings: TemplateStringsArray, ...values: unknown[]) => ({strings, values})),
+        {
+            raw: jest.fn(),
+        },
+    ),
     count: jest.fn(() => 'count'),
 }));
 
@@ -61,7 +64,6 @@ function setupDbMocks(recentCount = 0) {
 
 const validPayload = {
     type: 'erreur',
-    localisation: 'Forêt de Fontainebleau',
     description: 'Cette zone semble incorrecte sur la carte, veuillez vérifier',
     email: '',
     website: '',
@@ -118,7 +120,6 @@ describe('POST /api/feedback', () => {
         expect(insertValues).toHaveBeenCalledWith(
             expect.objectContaining({
                 type: 'erreur',
-                localisation: 'Forêt de Fontainebleau',
                 description: 'Cette zone semble incorrecte sur la carte, veuillez vérifier',
                 email: null,
                 ipHash: expect.any(String),
@@ -140,9 +141,7 @@ describe('POST /api/feedback', () => {
         const req = buildRequest({...validPayload, email: 'user@example.com'});
         const res = await POST(req);
         expect(res.status).toBe(200);
-        expect(insertValues).toHaveBeenCalledWith(
-            expect.objectContaining({email: 'user@example.com'}),
-        );
+        expect(insertValues).toHaveBeenCalledWith(expect.objectContaining({email: 'user@example.com'}));
     });
 
     it('sends team notification email when SMTP is configured', async () => {
