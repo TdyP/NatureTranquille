@@ -25,6 +25,10 @@ export interface ZoneDetailsProps {
     onClose: () => void;
 }
 
+const PROTECTION_TYPE_LABELS: Record<string, string> = {
+    reserve_chasse_faune_sauvage: 'Réserve de chasse et de faune sauvage',
+};
+
 /**
  * Format date string to French locale
  */
@@ -46,6 +50,22 @@ function formatDate(dateString: string): string {
 }
 
 /**
+ * Convert storage value to a user-friendly label
+ */
+function formatProtectionType(typeProtection: string): string {
+    const mappedLabel = PROTECTION_TYPE_LABELS[typeProtection];
+    if (mappedLabel) {
+        return mappedLabel;
+    }
+
+    return typeProtection
+        .split('_')
+        .filter(Boolean)
+        .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
+        .join(' ');
+}
+
+/**
  * Display zone details in a responsive Sheet (sidebar on desktop, bottom sheet on mobile)
  */
 export default function ZoneDetails({zone, onClose}: ZoneDetailsProps) {
@@ -61,7 +81,7 @@ export default function ZoneDetails({zone, onClose}: ZoneDetailsProps) {
                         <dl className="space-y-3">
                             <div>
                                 <dt className="text-sm font-medium text-muted-foreground">Type de protection</dt>
-                                <dd className="mt-1 text-base">{zone.typeProtection}</dd>
+                                <dd className="mt-1 text-base">{formatProtectionType(zone.typeProtection)}</dd>
                             </div>
 
                             <div>
