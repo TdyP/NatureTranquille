@@ -10,6 +10,7 @@ import {Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger} from './ui/s
 const navigationItems = [
     {label: 'Accueil', href: '/'},
     {label: 'À propos', href: '/a-propos'},
+    {label: 'Départements', href: '/departements'},
     {label: 'Feedback', href: '/feedback'},
 ];
 
