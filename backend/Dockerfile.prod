@@ -1,0 +1,23 @@
+FROM node:24-alpine
+
+# Install GDAL for PostGIS support
+RUN apk add --no-cache gdal gdal-tools
+
+WORKDIR /app
+
+# Copy package files first for better caching
+COPY package*.json ./
+COPY tsconfig.json ./
+
+# Install production dependencies only
+RUN npm ci --only=production
+
+# Copy compiled TypeScript files
+COPY dist/ ./dist/
+COPY src/ ./src/
+
+# Set production environment
+ENV NODE_ENV=production
+
+# Run the compiled backend
+CMD ["node", "dist/index.js"]
