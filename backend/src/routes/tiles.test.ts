@@ -81,7 +81,11 @@ describe('Tiles endpoint - Response headers', {skip: !dbAvailable && 'DATABASE_U
 
     it('should set Cache-Control header', async () => {
         const response = await request(app).get('/tiles/9/261/179.mvt');
-        assert.ok(response.headers['cache-control']?.includes('public, max-age=86400'));
+        if (response.status === 200) {
+            assert.ok(response.headers['cache-control']?.includes('public, max-age=86400'));
+        } else {
+            assert.equal(response.headers['cache-control'], 'no-store');
+        }
     });
 
     it('should set CORS header', async () => {

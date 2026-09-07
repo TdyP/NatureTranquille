@@ -31,3 +31,8 @@ export const zones = pgTable(
         index('idx_zones_code_departement').on(table.codeDepartement),
     ],
 );
+
+export const departements = pgTable('departements', {
+    code: varchar('code', {length: 3}).primaryKey(),
+    nom: text('nom').notNull(),
+});

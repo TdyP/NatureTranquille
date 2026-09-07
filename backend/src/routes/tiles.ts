@@ -189,17 +189,18 @@ router.get('/tiles/:z/:x/:y.mvt', async (req: Request, res: Response): Promise<v
             }
         }
 
-        // Set headers
-        res.setHeader('Content-Type', 'application/vnd.mapbox-vector-tile');
-        res.setHeader('Cache-Control', 'public, max-age=86400');
         res.setHeader('Access-Control-Allow-Origin', '*');
 
         // Return tile or 204 if empty
         if (!tile || tile.length === 0) {
+            // Do not cache empty tiles: they may become non-empty after a data import.
+            res.setHeader('Cache-Control', 'no-store');
             res.status(204).send();
             return;
         }
 
+        res.setHeader('Content-Type', 'application/vnd.mapbox-vector-tile');
+        res.setHeader('Cache-Control', 'public, max-age=86400');
         res.status(200).send(tile);
     } catch (error) {
         console.error(`Error serving tile ${zNum}/${xNum}/${yNum}:`, error);

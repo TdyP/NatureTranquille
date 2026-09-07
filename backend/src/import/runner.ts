@@ -75,16 +75,18 @@ async function importSource(
                                  THEN ST_GeomFromGeoJSON($5)
                                  ELSE ST_MakeValid(ST_GeomFromGeoJSON($5))
                             END
-                        )::geometry(MULTIPOLYGON, 4326) AS geometry
-                )
-                INSERT INTO public.zones (nom, type_protection, gestionnaire, source, date_maj, geometry)
-                SELECT $1, $2, $3, $4, NOW(), c.geometry
-                FROM candidate c
-                WHERE NOT EXISTS (
-                    SELECT 1
-                    FROM public.zones z
-                    WHERE md5(ST_AsBinary(z.geometry)) = md5(ST_AsBinary(c.geometry))
-                )`,
+                        )::geometry(MULTIPOLYGON, 4326) AS geometry,
+                        LPAD(CAST(CAST(substring($4 FROM '_S_([0-9]{3})$') AS int) AS text), 2, '0') AS code_departement
+                    )
+                    INSERT INTO public.zones (nom, type_protection, gestionnaire, source, date_maj, geometry, code_departement, nom_departement)
+                    SELECT $1, $2, $3, $4, NOW(), c.geometry, c.code_departement, d.nom
+                    FROM candidate c
+                    LEFT JOIN public.departements d ON d.code = c.code_departement
+                    WHERE NOT EXISTS (
+                        SELECT 1
+                        FROM public.zones z
+                        WHERE md5(ST_AsBinary(z.geometry)) = md5(ST_AsBinary(c.geometry))
+                    )`,
                 [nom, typeProtection, gestionnaire, source.sourceValue, geomJson],
             );
 
