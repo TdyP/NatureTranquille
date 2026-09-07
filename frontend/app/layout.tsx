@@ -3,9 +3,10 @@ import Script from 'next/script';
 import './globals.css';
 import Header from '@/components/Header';
 import {Toaster} from 'sonner';
-import {schemaOrgWebApp} from '@/lib/schema';
+import {schemaOrgWebApp, schemaOrgWebSite} from '@/lib/schema';
 
 export const metadata: Metadata = {
+    metadataBase: new URL('https://naturetranquille.fr'),
     title: 'NatureTranquille - Carte des zones sans chasse en France',
     description:
         'Carte interactive gratuite des zones sans chasse en France : réserves naturelles, RNCFS. Trouvez les zones protégées près de chez vous pour profiter de la nature en toute sérénité.',
@@ -55,6 +56,10 @@ export default function RootLayout({children}: {children: React.ReactNode}) {
                 <script
                     type="application/ld+json"
                     dangerouslySetInnerHTML={{__html: JSON.stringify(schemaOrgWebApp)}}
+                />
+                <script
+                    type="application/ld+json"
+                    dangerouslySetInnerHTML={{__html: JSON.stringify(schemaOrgWebSite)}}
                 />
                 <div className="flex h-full flex-col">
                     <Header />

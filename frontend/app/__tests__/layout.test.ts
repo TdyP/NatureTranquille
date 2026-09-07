@@ -3,7 +3,7 @@
  */
 
 import {metadata} from '../layout';
-import {schemaOrgWebApp} from '../../lib/schema';
+import {schemaOrgWebApp, schemaOrgWebSite, schemaOrgBreadcrumb} from '../../lib/schema';
 
 describe('layout metadata', () => {
     it('has correct title', () => {
@@ -69,5 +69,51 @@ describe('schemaOrgWebApp', () => {
 
     it('serializes to valid JSON', () => {
         expect(() => JSON.stringify(schemaOrgWebApp)).not.toThrow();
+    });
+});
+
+describe('schemaOrgWebSite', () => {
+    it('has correct @type', () => {
+        expect(schemaOrgWebSite['@type']).toBe('WebSite');
+    });
+
+    it('has correct @context', () => {
+        expect(schemaOrgWebSite['@context']).toBe('https://schema.org');
+    });
+
+    it('has correct name and url', () => {
+        expect(schemaOrgWebSite.name).toBe('NatureTranquille');
+        expect(schemaOrgWebSite.url).toBe('https://naturetranquille.fr');
+    });
+
+    it('has SearchAction potentialAction', () => {
+        const action = schemaOrgWebSite.potentialAction as Record<string, unknown>;
+        expect(action['@type']).toBe('SearchAction');
+        const target = action.target as Record<string, unknown>;
+        expect(target.urlTemplate).toContain('search_term_string');
+        expect(action['query-input']).toContain('search_term_string');
+    });
+
+    it('serializes to valid JSON', () => {
+        expect(() => JSON.stringify(schemaOrgWebSite)).not.toThrow();
+    });
+});
+
+describe('schemaOrgBreadcrumb', () => {
+    it('builds a BreadcrumbList with correct positions', () => {
+        const breadcrumb = schemaOrgBreadcrumb([
+            {name: 'Accueil', url: 'https://naturetranquille.fr'},
+            {name: 'Départements', url: 'https://naturetranquille.fr/departements'},
+            {name: 'Haut-Rhin', url: 'https://naturetranquille.fr/departements/haut-rhin-68'},
+        ]);
+        expect(breadcrumb['@type']).toBe('BreadcrumbList');
+        expect(breadcrumb.itemListElement).toHaveLength(3);
+        expect(breadcrumb.itemListElement[0].position).toBe(1);
+        expect(breadcrumb.itemListElement[2].name).toBe('Haut-Rhin');
+    });
+
+    it('serializes to valid JSON', () => {
+        const breadcrumb = schemaOrgBreadcrumb([{name: 'A', url: 'https://example.com'}]);
+        expect(() => JSON.stringify(breadcrumb)).not.toThrow();
     });
 });

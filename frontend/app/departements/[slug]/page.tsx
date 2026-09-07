@@ -2,7 +2,13 @@ import {notFound} from 'next/navigation';
 import dynamicImport from 'next/dynamic';
 import Link from 'next/link';
 import type {Metadata} from 'next';
-import {getDepartementsWithZones, getDepartementBySlug, getDepartementBounds} from '@/lib/db/departements';
+import {
+    getDepartementsWithZones,
+    getDepartementBySlug,
+    getDepartementBounds,
+    getZonesByDepartement,
+} from '@/lib/db/departements';
+import {schemaOrgBreadcrumb} from '@/lib/schema';
 
 const Map = dynamicImport(() => import('@/components/Map'), {
     ssr: false,
@@ -46,8 +52,20 @@ export default async function DepartementPage({params}: Props) {
 
     if (!dept) notFound();
 
+    const zones = await getZonesByDepartement(dept.code);
+
+    const breadcrumbLd = schemaOrgBreadcrumb([
+        {name: 'Accueil', url: 'https://naturetranquille.fr'},
+        {name: 'Départements', url: 'https://naturetranquille.fr/departements'},
+        {name: dept.nom, url: `https://naturetranquille.fr/departements/${params.slug}`},
+    ]);
+
     return (
         <div className="flex h-full flex-col">
+            <script
+                type="application/ld+json"
+                dangerouslySetInnerHTML={{__html: JSON.stringify(breadcrumbLd)}}
+            />
             <div className="shrink-0 border-b bg-background px-4 py-3">
                 <nav aria-label="Breadcrumb" className="mb-1">
                     <ol className="flex items-center gap-2 text-sm text-muted-foreground">
@@ -72,6 +90,24 @@ export default async function DepartementPage({params}: Props) {
                     Réserves de chasse — {dept.nom} ({dept.code})
                 </h1>
             </div>
+
+            {/* SSR content visible to crawlers without JavaScript */}
+            <section className="sr-only">
+                <p>
+                    Le {dept.nom} ({dept.code}) compte {dept.zonesCount} zones sans chasse référencées sur
+                    NatureTranquille.
+                </p>
+                {zones.length > 0 && (
+                    <ul>
+                        {zones.map((zone) => (
+                            <li key={zone.id}>
+                                {zone.nom ?? `Zone ${zone.id}`}
+                                {zone.typeProtection ? ` — ${zone.typeProtection}` : ''}
+                            </li>
+                        ))}
+                    </ul>
+                )}
+            </section>
 
             <div
                 className="flex-1 overflow-hidden"

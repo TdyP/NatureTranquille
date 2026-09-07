@@ -1,0 +1,27 @@
+# NatureTranquille
+
+> Carte interactive gratuite des zones sans chasse en France
+
+NatureTranquille recense et cartographie les réserves de chasse et zones naturelles protégées en France (réserves naturelles, réserves de chasse et de faune sauvage, etc.) pour permettre à chacun·e de profiter de la nature en toute sérénité — randonnée, photographie, promenade.
+
+## Site
+
+- URL : https://naturetranquille.fr
+- Langue : français
+- Projet open source : https://github.com/TdyP/NatureTranquille
+- Contact : hello+nt@teddypaul.fr
+
+## Pages principales
+
+- [Accueil](https://naturetranquille.fr) — carte interactive nationale des zones sans chasse
+- [Départements](https://naturetranquille.fr/departements) — liste des départements avec réserves de chasse référencées
+- [À propos](https://naturetranquille.fr/a-propos) — mission, contexte et contact du projet
+- [Signaler une erreur](https://naturetranquille.fr/feedback) — formulaire de signalement ou suggestion
+
+## Sources de données
+
+Les zones référencées proviennent de données officielles publiques françaises (réserves naturelles, réserves de chasse et de faune sauvage). Le projet agrège et cartographie ces données pour les rendre accessibles au grand public.
+
+## Licence
+
+Le code est open source. Voir le dépôt GitHub pour les détails de licence.

@@ -1,63 +1,25 @@
-'use client';
-
-import {useRef, useCallback} from 'react';
-import dynamic from 'next/dynamic';
-import SearchBar, {AddressSearchResult} from '@/components/SearchBar';
-import {MapHandle} from '@/components/Map';
-import DisclaimerModal from '@/components/DisclaimerModal';
-
-const Map = dynamic(() => import('@/components/Map'), {
-    ssr: false,
-    loading: () => (
-        <div className="flex h-full items-center justify-center">
-            <div className="flex flex-col items-center gap-2 text-center">
-                <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
-                <p className="text-sm text-muted-foreground">Chargement de la carte...</p>
-            </div>
-        </div>
-    ),
-});
+import Link from 'next/link';
+import MapClient from './MapClient';
 
 export default function Home() {
-    const mapHandleRef = useRef<MapHandle | null>(null);
-
-    const handleMapReady = useCallback((handle: MapHandle) => {
-        console.log('Map is ready!');
-        mapHandleRef.current = handle;
-    }, []);
-
-    const handleLocationSelect = useCallback((result: AddressSearchResult) => {
-        console.log('Location selected:', result.properties.label);
-        console.log('Map handle:', mapHandleRef.current);
-
-        if (!mapHandleRef.current) {
-            console.error('Map not ready yet!');
-            return;
-        }
-
-        const [lng, lat] = result.geometry.coordinates;
-
-        // If bbox is available, use fitBounds for better viewport
-        if (result.bbox) {
-            console.log('Using fitBounds with bbox:', result.bbox);
-            mapHandleRef.current.fitBounds(result.bbox as [number, number, number, number], 50);
-        } else {
-            // Otherwise, fly to the point with zoom 12
-            console.log('Using flyToLocation:', lng, lat);
-            mapHandleRef.current.flyToLocation(lng, lat, 12);
-        }
-    }, []);
-
     return (
         <div className="relative h-full overflow-hidden">
-            <DisclaimerModal />
-
-            {/* Search bar overlay */}
-            <div className="absolute left-1/2 top-4 z-10 w-full max-w-md -translate-x-1/2 px-4 sm:px-0">
-                <SearchBar onSelectLocation={handleLocationSelect} className="shadow-lg" />
+            {/* SSR content visible to crawlers without JavaScript */}
+            <div className="sr-only">
+                <h1>Carte des zones sans chasse en France</h1>
+                <p>
+                    NatureTranquille est une carte interactive gratuite des réserves de chasse et zones naturelles
+                    protégées en France. Trouvez les zones sans chasse près de chez vous pour randonner, vous
+                    promener ou photographier la nature en toute sérénité.
+                </p>
+                <p>
+                    Parcourez les réserves de chasse{' '}
+                    <Link href="/departements">par département</Link>, ou{' '}
+                    <Link href="/a-propos">en savoir plus</Link> sur le projet.
+                </p>
             </div>
 
-            <Map onMapReady={handleMapReady} />
+            <MapClient />
         </div>
     );
 }
