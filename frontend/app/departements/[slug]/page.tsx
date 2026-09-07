@@ -1,10 +1,10 @@
 import {notFound} from 'next/navigation';
-import dynamic from 'next/dynamic';
+import dynamicImport from 'next/dynamic';
 import Link from 'next/link';
 import type {Metadata} from 'next';
 import {getDepartementsWithZones, getDepartementBySlug, getDepartementBounds} from '@/lib/db/departements';
 
-const Map = dynamic(() => import('@/components/Map'), {
+const Map = dynamicImport(() => import('@/components/Map'), {
     ssr: false,
     loading: () => (
         <div className="flex h-full items-center justify-center">
@@ -20,10 +20,8 @@ type Props = {
     params: {slug: string};
 };
 
-export async function generateStaticParams(): Promise<{slug: string}[]> {
-    const departements = await getDepartementsWithZones();
-    return departements.map((d) => ({slug: d.slug}));
-}
+// Disable static generation - pages will be generated at request time
+export const dynamic = 'force-dynamic';
 
 export async function generateMetadata({params}: Props): Promise<Metadata> {
     const dept = await getDepartementBySlug(params.slug);

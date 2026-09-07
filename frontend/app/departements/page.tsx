@@ -6,6 +6,9 @@ export const metadata = {
     description: 'Liste des départements avec des réserves de chasse référencées sur NatureTranquille.',
 };
 
+// Disable static generation - pages will be generated at request time
+export const dynamic = 'force-dynamic';
+
 export default async function DepartementsPage() {
     const departements = await getDepartementsWithZones();
 
